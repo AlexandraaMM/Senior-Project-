@@ -1,0 +1,119 @@
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Cryptography;
+using System.Text;
+using PracticeFlow.Models;
+using PracticeFlow.Data;
+
+namespace INF_SP.Controllers
+{
+    public class AccountController : Controller
+    {
+        private readonly ApplicationDbContext _context;
+
+        public AccountController(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
+        // GET: /Account/Login
+        public IActionResult Login()
+        {
+            return View();
+        }
+
+        // POST: /Account/Login
+        [HttpPost]
+        public async Task<IActionResult> Login(string username, string passwordHash)
+        {
+            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(passwordHash))
+            {
+                ViewBag.Error = "Please enter both username and password";
+                return View();
+            }
+
+            // Hash the password (in production, use proper hashing like BCrypt)
+            var hashedPassword = HashPassword(passwordHash);
+
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.Username == username && u.PasswordHash == hashedPassword);
+
+            if (user == null)
+            {
+                ViewBag.Error = "Invalid username or password";
+                return View();
+            }
+
+            // Store user info in session (in production, use proper authentication)
+            HttpContext.Session.SetString("UserId", user.UserID.ToString());
+            HttpContext.Session.SetString("Username", user.Username);
+            HttpContext.Session.SetString("Role", user.Role);
+            HttpContext.Session.SetString("FullName", user.FullName);
+
+            // Redirect based on role
+            return RedirectToAction("Index", "Home");
+        }
+
+        // GET: /Account/Register
+        public IActionResult Register()
+        {
+            return View();
+        }
+
+        // POST: /Account/Register
+        [HttpPost]
+        public async Task<IActionResult> Register(User user)
+        {
+            if (ModelState.IsValid)
+            {
+                // Check if username exists
+                if (await _context.Users.AnyAsync(u => u.Username == user.Username))
+                {
+                    ModelState.AddModelError("Username", "Username already exists");
+                    return View(user);
+                }
+
+                // Check if email exists
+                if (await _context.Users.AnyAsync(u => u.Email == user.Email))
+                {
+                    ModelState.AddModelError("Email", "Email already registered");
+                    return View(user);
+                }
+
+                // Hash password
+                user.PasswordHash = HashPassword(user.PasswordHash);
+
+                // Add to database
+                _context.Users.Add(user);
+                await _context.SaveChangesAsync();
+
+                // Auto-login after registration
+                HttpContext.Session.SetString("UserId", user.UserID.ToString());
+                HttpContext.Session.SetString("Username", user.Username);
+                HttpContext.Session.SetString("Role", user.Role);
+                HttpContext.Session.SetString("FullName", user.FullName);
+
+                return RedirectToAction("Index", "Home");
+            }
+
+            return View(user);
+        }
+
+        // GET: /Account/Logout
+        public IActionResult Logout()
+        {
+            HttpContext.Session.Clear();
+            return RedirectToAction("Login");
+        }
+
+        // Password hashing 
+        private string HashPassword(string password)
+        {
+            using (var sha256 = SHA256.Create())
+            {
+                var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+                return Convert.ToBase64String(hashedBytes);
+            }
+        }
+    }
+}

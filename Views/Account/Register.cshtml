@@ -1,0 +1,57 @@
+@model PracticeFlow.Models.User
+
+@{
+    ViewData["Title"] = "Register";
+}
+
+<h2>Create New Account</h2>
+
+<form asp-action="Register" method="post">
+    <div>
+        <label asp-for="Username">Username:</label>
+        <input asp-for="Username" class="form-control" required />
+    </div>
+    
+    <div>
+        <label asp-for="FullName">Full Name:</label>
+        <input asp-for="FullName" class="form-control" required />
+    </div>
+    
+    <div>
+        <label asp-for="Email">Email:</label>
+        <input asp-for="Email" type="email" class="form-control" required />
+    </div>
+    
+    <div>
+        <label asp-for="PasswordHash">Password:</label>
+        <input asp-for="PasswordHash" type="password" class="form-control" required />
+    </div>
+    
+    <div>
+        <label asp-for="Role">Role:</label>
+        <select asp-for="Role" class="form-control" required>
+            <option value="">Select Role</option>
+            <option value="Admin">Admin</option>
+            <option value="Doctor">Doctor</option>
+            <option value="Patient">Patient</option>
+        </select>
+    </div>
+    
+    <div>
+        <label asp-for="DateOfBirth">Date of Birth:</label>
+        <input asp-for="DateOfBirth" type="date" class="form-control" required />
+    </div>
+    
+    <button type="submit" class="btn btn-primary mt-3">Register</button>
+    <a href="/Account/Login" class="btn btn-link">Back to Login</a>
+</form>
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger mt-3">
+        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+            <p>@error.ErrorMessage</p>
+        }
+    </div>
+}

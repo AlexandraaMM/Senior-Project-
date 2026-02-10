@@ -1,0 +1,27 @@
+@{
+    ViewData["Title"] = "Login";
+}
+
+<h2>PracticeFlow Login</h2>
+
+<form action="/Account/Login" method="post">
+    <div>
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required />
+    </div>
+    
+    <div>
+        <label for="passwordHash">Password:</label>
+        <input type="password" id="passwordHash" name="passwordHash" required />
+    </div>
+    
+    <button type="submit">Login</button>
+</form>
+
+<!-- ADD THIS LINE -->
+<p>Don't have an account? <a href="/Account/Register">Register here</a></p>
+
+@if (ViewBag.Error != null)
+{
+    <p style="color: red;">@ViewBag.Error</p>
+}
