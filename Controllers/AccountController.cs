@@ -16,13 +16,13 @@ namespace INF_SP.Controllers
             _context = context;
         }
 
-        // GET: /Account/Login
+        
         public IActionResult Login()
         {
             return View();
         }
 
-        // POST: /Account/Login
+        
         [HttpPost]
         public async Task<IActionResult> Login(string username, string passwordHash)
         {
@@ -32,7 +32,7 @@ namespace INF_SP.Controllers
                 return View();
             }
 
-            // Hash the password (in production, use proper hashing like BCrypt)
+            // Hash the password 
             var hashedPassword = HashPassword(passwordHash);
 
             var user = await _context.Users
@@ -44,23 +44,33 @@ namespace INF_SP.Controllers
                 return View();
             }
 
-            // Store user info in session (in production, use proper authentication)
+            // Store user info in session 
             HttpContext.Session.SetString("UserId", user.UserID.ToString());
             HttpContext.Session.SetString("Username", user.Username);
             HttpContext.Session.SetString("Role", user.Role);
             HttpContext.Session.SetString("FullName", user.FullName);
 
-            // Redirect based on role
-            return RedirectToAction("Index", "Home");
+            
+            switch (user.Role)
+            {
+                case "Admin":
+                    return RedirectToAction("AdminDashboard", "Home");
+                case "Doctor":
+                    return RedirectToAction("DoctorDashboard", "Home");
+                case "Patient":
+                    return RedirectToAction("PatientDashboard", "Home");
+                default:
+                    return RedirectToAction("Index", "Home");
+            }
         }
 
-        // GET: /Account/Register
+        
         public IActionResult Register()
         {
             return View();
         }
 
-        // POST: /Account/Register
+        
         [HttpPost]
         public async Task<IActionResult> Register(User user)
         {
@@ -93,20 +103,30 @@ namespace INF_SP.Controllers
                 HttpContext.Session.SetString("Role", user.Role);
                 HttpContext.Session.SetString("FullName", user.FullName);
 
-                return RedirectToAction("Index", "Home");
+                
+                switch (user.Role)
+                {
+                    case "Admin":
+                        return RedirectToAction("AdminDashboard", "Home");
+                    case "Doctor":
+                        return RedirectToAction("DoctorDashboard", "Home");
+                    case "Patient":
+                        return RedirectToAction("PatientDashboard", "Home");
+                    default:
+                        return RedirectToAction("Index", "Home");
+                }
             }
 
             return View(user);
         }
 
-        // GET: /Account/Logout
+   
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();
             return RedirectToAction("Login");
         }
 
-        // Password hashing 
         private string HashPassword(string password)
         {
             using (var sha256 = SHA256.Create())

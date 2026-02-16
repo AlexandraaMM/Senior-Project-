@@ -1,0 +1,17 @@
+@{
+    ViewData["Title"] = "Patient Dashboard";
+}
+
+<h1>Welcome @ViewBag.Username!</h1>
+<p>Full Name: @ViewBag.FullName</p>
+<p>Role: @ViewBag.Role</p>
+
+<h3>Patient Features:</h3>
+<ul>
+    <li>View appointments</li>
+    <li>Check medical history</li>
+    <li>View prescriptions</li>
+    <li>Track health progress</li>
+</ul>
+
+<a href="@Url.Action("Logout", "Account")" class="btn btn-danger">Logout</a>
