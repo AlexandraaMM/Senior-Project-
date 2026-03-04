@@ -1,0 +1,42 @@
+@{
+    ViewData["Title"] = "Doctor Dashboard";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Welcome Dr. @ViewBag.FullName!</h1>
+        <a asp-controller="Account" asp-action="Logout" class="btn btn-danger">Logout</a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card text-white bg-primary mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">My Patients</h5>
+                    <p class="card-text">View and manage your patients</p>
+                    <a href="#" class="btn btn-light">View Patients</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card text-white bg-success mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Appointments</h5>
+                    <p class="card-text">View scheduled appointments</p>
+                    <a href="#" class="btn btn-light">View Schedule</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card text-white bg-info mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Medical Records</h5>
+                    <p class="card-text">Access patient medical records</p>
+                    <a href="#" class="btn btn-light">View Records</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

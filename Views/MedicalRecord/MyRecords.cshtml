@@ -1,0 +1,38 @@
+@model IEnumerable<PracticeFlow.Models.MedicalRecord>
+
+@{
+    ViewData["Title"] = "My Medical Records";
+}
+
+<h2>My Medical Records</h2>
+
+@if (!Model.Any())
+{
+    <p>No medical records found.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Doctor</th>
+                <th>Diagnosis</th>
+                <th>Treatment</th>
+                <th>Prescription</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var record in Model)
+            {
+                <tr>
+                    <td>@record.RecordDate.ToString("yyyy-MM-dd")</td>
+                    <td>@(record.Doctor?.FullName ?? "N/A")</td>
+                    <td>@record.Diagnosis</td>
+                    <td>@record.Treatment</td>
+                    <td>@record.Prescription</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

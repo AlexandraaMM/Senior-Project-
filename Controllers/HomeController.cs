@@ -1,31 +1,104 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using INF_SP.Models;
+using Microsoft.EntityFrameworkCore;
+using PracticeFlow.Data;
+using PracticeFlow.Models;
+using Microsoft.AspNetCore.Http;
 
-namespace INF_SP.Controllers;
-
-public class HomeController : Controller
+namespace INF_SP.Controllers
 {
-    private readonly ILogger<HomeController> _logger;
-
-    public HomeController(ILogger<HomeController> logger)
+    public class HomeController : Controller
     {
-        _logger = logger;
-    }
+        private readonly ApplicationDbContext _context;
 
-    public IActionResult Index()
-    {
-        return View();
-    }
+        public HomeController(ApplicationDbContext context)
+        {
+            _context = context;
+        }
 
-    public IActionResult Privacy()
-    {
-        return View();
-    }
+        // This is the main page and it redirects to the right dashboard
+        public IActionResult Index()
+        {
+            // Check if user is logged in
+            var userId = HttpContext.Session.GetString("UserId");
+            
+            if (string.IsNullOrEmpty(userId))
+            {
+                // If not logged in go to login page
+                return RedirectToAction("Login", "Account");
+            }
 
-    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
-    {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            
+            var role = HttpContext.Session.GetString("Role");
+            
+            // Send them to their specific dashboard
+            switch (role)
+            {
+                case "Admin":
+                    return RedirectToAction("AdminDashboard");
+                case "Doctor":
+                    return RedirectToAction("DoctorDashboard");
+                case "Patient":
+                    return RedirectToAction("PatientDashboard");
+                default:
+                    return View();
+            }
+        }
+
+        
+        public IActionResult AdminDashboard()
+        {
+            
+            var role = HttpContext.Session.GetString("Role");
+            if (role != "Admin")
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+           
+            ViewBag.Username = HttpContext.Session.GetString("Username");
+            ViewBag.FullName = HttpContext.Session.GetString("FullName");
+            ViewBag.Role = role;
+            
+            return View();
+        }
+
+               public IActionResult DoctorDashboard()
+        {
+            
+            var role = HttpContext.Session.GetString("Role");
+            if (role != "Doctor")
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            
+            ViewBag.Username = HttpContext.Session.GetString("Username");
+            ViewBag.FullName = HttpContext.Session.GetString("FullName");
+            ViewBag.Role = role;
+            
+            return View();
+        }
+
+        
+                public async Task<IActionResult> PatientDashboard()
+        {
+            var role = HttpContext.Session.GetString("Role");
+            if (role != "Patient")
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+    // Get the patient's data from database
+    var userId = int.Parse(HttpContext.Session.GetString("UserId"));
+    var patient = await _context.Users.FindAsync(userId);
+    
+    // Pass the model to the view
+    return View(patient);
+}
+
+        public IActionResult Privacy()
+        {
+            return View();
+        }
     }
 }

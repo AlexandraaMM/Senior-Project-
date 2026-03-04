@@ -1,0 +1,29 @@
+@model PracticeFlow.Models.Appointment
+
+@{
+    ViewData["Title"] = "Book Appointment";
+}
+
+<h2>Book New Appointment</h2>
+
+<form asp-action="Book" method="post">
+    <div class="form-group">
+        <label asp-for="DoctorId">Select Doctor</label>
+        <select asp-for="DoctorId" class="form-control" asp-items="@(new SelectList(ViewBag.Doctors, "UserID", "FullName"))" required>
+            <option value="">-- Select Doctor --</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="AppointmentDate">Appointment Date & Time</label>
+        <input asp-for="AppointmentDate" type="datetime-local" class="form-control" required />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Reason">Reason for Visit</label>
+        <textarea asp-for="Reason" class="form-control" rows="3" required></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Book Appointment</button>
+    <a href="/Appointment/MyAppointments" class="btn btn-secondary">Cancel</a>
+</form>

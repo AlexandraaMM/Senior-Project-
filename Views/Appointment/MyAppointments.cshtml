@@ -1,0 +1,33 @@
+@model IEnumerable<PracticeFlow.Models.Appointment>
+
+@{
+    ViewData["Title"] = "My Appointments";
+}
+
+<h2>My Appointments</h2>
+
+<p>
+    <a href="/Appointment/Book" class="btn btn-primary">Book New Appointment</a>
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Doctor</th>
+            <th>Date & Time</th>
+            <th>Reason</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var appointment in Model)
+        {
+            <tr>
+                <td>@(appointment.Doctor?.FullName ?? "N/A")</td>
+                <td>@appointment.AppointmentDate.ToString("yyyy-MM-dd HH:mm")</td>
+                <td>@appointment.Reason</td>
+                <td>@appointment.Status</td>
+            </tr>
+        }
+    </tbody>
+</table>
