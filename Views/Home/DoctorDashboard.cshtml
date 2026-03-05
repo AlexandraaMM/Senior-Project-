@@ -14,7 +14,7 @@
                 <div class="card-body">
                     <h5 class="card-title">My Patients</h5>
                     <p class="card-text">View and manage your patients</p>
-                    <a href="#" class="btn btn-light">View Patients</a>
+                    <a asp-controller="DoctorPatient" asp-action="ViewPatients" class="btn btn-light">View Patients</a>
                 </div>
             </div>
         </div>
@@ -24,7 +24,7 @@
                 <div class="card-body">
                     <h5 class="card-title">Appointments</h5>
                     <p class="card-text">View scheduled appointments</p>
-                    <a href="#" class="btn btn-light">View Schedule</a>
+                    <a asp-controller="Appointment" asp-action="DoctorAppointments" class="btn btn-light">View Schedule</a>
                 </div>
             </div>
         </div>
@@ -34,7 +34,7 @@
                 <div class="card-body">
                     <h5 class="card-title">Medical Records</h5>
                     <p class="card-text">Access patient medical records</p>
-                    <a href="#" class="btn btn-light">View Records</a>
+                    <a asp-controller="DoctorMedicalRecord" asp-action="ViewRecords" class="btn btn-light">View Records</a>
                 </div>
             </div>
         </div>

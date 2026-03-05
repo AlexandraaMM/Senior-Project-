@@ -30,8 +30,20 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQXBwb2ludG1lbnQvQm9vay5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[/Users/alexandramihaylova/Desktop/AUBG/8th semester/Senior Thesis/INF_SP/Views/Appointment/DoctorAppointments.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQXBwb2ludG1lbnQvRG9jdG9yQXBwb2ludG1lbnRzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [/Users/alexandramihaylova/Desktop/AUBG/8th semester/Senior Thesis/INF_SP/Views/Appointment/MyAppointments.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQXBwb2ludG1lbnQvTXlBcHBvaW50bWVudHMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/alexandramihaylova/Desktop/AUBG/8th semester/Senior Thesis/INF_SP/Views/DoctorMedicalRecord/ViewRecords.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRG9jdG9yTWVkaWNhbFJlY29yZC9WaWV3UmVjb3Jkcy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/alexandramihaylova/Desktop/AUBG/8th semester/Senior Thesis/INF_SP/Views/DoctorPatient/ViewPatients.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRG9jdG9yUGF0aWVudC9WaWV3UGF0aWVudHMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/alexandramihaylova/Desktop/AUBG/8th semester/Senior Thesis/INF_SP/Views/Home/AdminDashboard.cshtml]
