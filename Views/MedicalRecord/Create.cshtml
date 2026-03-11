@@ -1,0 +1,62 @@
+@model PracticeFlow.Models.MedicalRecord
+
+@{
+    ViewData["Title"] = "Create Medical Record";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <h2>Create Medical Record</h2>
+    <hr />
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["Success"]
+        </div>
+    }
+
+    <form asp-action="Create" method="post">
+        
+        <div class="form-group mb-3">
+            <label>Select Patient</label>
+            <select name="PatientId" class="form-control">
+                <option value="">-- Select Patient --</option>
+                @foreach (var patient in ViewBag.Patients as List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)
+                {
+                    <option value="@patient.Value">@patient.Text</option>
+                }
+            </select>
+        </div>
+
+        <div class="form-group mb-3">
+            <label>Reason for Visit</label>
+            <input name="ReasonForVisit" class="form-control" placeholder="E.g., Annual checkup" />
+        </div>
+
+        <div class="form-group mb-3">
+            <label>Diagnosis</label>
+            <textarea name="Diagnosis" class="form-control" rows="3"></textarea>
+        </div>
+
+        <div class="form-group mb-3">
+            <label>Treatment</label>
+            <textarea name="Treatment" class="form-control" rows="3"></textarea>
+        </div>
+
+        <div class="form-group mb-3">
+            <label>Prescription</label>
+            <textarea name="Prescription" class="form-control" rows="2"></textarea>
+        </div>
+
+        <div class="form-group mb-3">
+            <label>Additional Notes</label>
+            <textarea name="Notes" class="form-control" rows="3"></textarea>
+        </div>
+
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">Create Medical Record</button>
+            <a href="/Home/DoctorDashboard" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>

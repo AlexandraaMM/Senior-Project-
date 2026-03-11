@@ -39,6 +39,7 @@ namespace PracticeFlow.Models
         public string Role { get; set; }
         
         public DateTime? DateOfBirth { get; set; }
+
         
         
     }
