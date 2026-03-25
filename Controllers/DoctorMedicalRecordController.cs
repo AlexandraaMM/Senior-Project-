@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PracticeFlow.Data;
+using PracticeFlow.Models;
 
 namespace INF_SP.Controllers
 {
@@ -35,6 +36,95 @@ namespace INF_SP.Controllers
 
             ViewBag.DoctorName = HttpContext.Session.GetString("FullName");
             return View(records);
+        }
+
+        // View medical record details
+        public async Task<IActionResult> ViewDetails(int id)
+        {
+            // Check if user is logged in and is a doctor
+            var userId = HttpContext.Session.GetString("UserId");
+            var role = HttpContext.Session.GetString("Role");
+            
+            if (string.IsNullOrEmpty(userId) || role != "Doctor")
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var record = await _context.MedicalRecords
+                .Include(r => r.Patient)
+                .Include(r => r.Doctor)
+                .FirstOrDefaultAsync(r => r.RecordId == id);
+            
+            if (record == null)
+            {
+                TempData["Error"] = "Medical record not found";
+                return RedirectToAction("ViewRecords");
+            }
+
+            return View(record);
+        }
+
+        // Add prescription to medical record
+        public async Task<IActionResult> AddPrescription(int id)
+        {
+            // Check if user is logged in and is a doctor
+            var userId = HttpContext.Session.GetString("UserId");
+            var role = HttpContext.Session.GetString("Role");
+            
+            if (string.IsNullOrEmpty(userId) || role != "Doctor")
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var record = await _context.MedicalRecords
+                .Include(r => r.Patient)
+                .FirstOrDefaultAsync(r => r.RecordId == id);
+            
+            if (record == null)
+            {
+                TempData["Error"] = "Medical record not found";
+                return RedirectToAction("ViewRecords");
+            }
+
+            ViewBag.RecordId = id;
+            ViewBag.PatientName = record.Patient.FullName;
+            ViewBag.PatientID = record.PatientId;
+            return View();
+        }
+
+        // Add prescription
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddPrescription(Prescription prescription)
+        {
+            // Check if user is logged in and is a doctor
+            var userId = HttpContext.Session.GetString("UserId");
+            var role = HttpContext.Session.GetString("Role");
+            
+            if (string.IsNullOrEmpty(userId) || role != "Doctor")
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            prescription.CreatedDate = DateTime.Now;
+
+            if (ModelState.IsValid)
+            {
+                _context.Prescriptions.Add(prescription);
+                await _context.SaveChangesAsync();
+
+                TempData["Success"] = "Prescription added successfully!";
+                return RedirectToAction("ViewRecords");
+            }
+
+            var record = await _context.MedicalRecords
+                .Include(r => r.Patient)
+                .FirstOrDefaultAsync(r => r.RecordId == prescription.RecordId);
+            
+            ViewBag.RecordId = prescription.RecordId;
+            ViewBag.PatientName = record?.Patient.FullName;
+            ViewBag.PatientID = record?.PatientId;
+            return View(prescription);
         }
     }
 }

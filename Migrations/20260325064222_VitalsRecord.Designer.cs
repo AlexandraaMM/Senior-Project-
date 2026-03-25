@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PracticeFlow.Data;
 
@@ -10,9 +11,11 @@ using PracticeFlow.Data;
 namespace INF_SP.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260325064222_VitalsRecord")]
+    partial class VitalsRecord
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.17");
@@ -253,6 +256,7 @@ namespace INF_SP.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int?>("RecordId")
+                        .IsRequired()
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("RecordedDate")
@@ -359,7 +363,9 @@ namespace INF_SP.Migrations
 
                     b.HasOne("PracticeFlow.Models.MedicalRecord", "MedicalRecord")
                         .WithMany()
-                        .HasForeignKey("RecordId");
+                        .HasForeignKey("RecordId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("MedicalRecord");
 

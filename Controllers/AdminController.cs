@@ -2,8 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PracticeFlow.Data;
 using PracticeFlow.Models;
-using System.Security.Cryptography;
-using System.Text;
+using BCrypt.Net;
 
 namespace INF_SP.Controllers
 {
@@ -80,11 +79,7 @@ namespace INF_SP.Controllers
             }
 
             // Hash the password
-            using (var sha256 = SHA256.Create())
-            {
-                var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes("Password123"));
-                user.PasswordHash = BitConverter.ToString(hashedBytes).Replace("-", "").ToLower();
-            }
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword("Password123");
 
             if (ModelState.IsValid)
             {

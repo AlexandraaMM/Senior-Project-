@@ -36,8 +36,11 @@
                             <td>@patient.Email</td>
                             <td>@(patient.DateOfBirth?.ToString("MMM dd, yyyy") ?? "N/A")</td>
                             <td>
-                                <a href="#" class="btn btn-sm btn-primary">View Details</a>
-                                <a href="#" class="btn btn-sm btn-info">Medical History</a>
+                                
+                                <a asp-action="ViewDetails" asp-route-id="@patient.UserID" class="btn btn-sm btn-primary">View Details</a>
+                                <a asp-action="MedicalHistory" asp-route-id="@patient.UserID" class="btn btn-sm btn-info">Medical History</a>
+                                <a asp-action="LogVitals" asp-route-id="@patient.UserID" class="btn btn-sm btn-success">Log Vitals</a>
+                                
                             </td>
                         </tr>
                     }

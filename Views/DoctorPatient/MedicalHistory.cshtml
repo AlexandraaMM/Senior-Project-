@@ -1,0 +1,49 @@
+@model IEnumerable<PracticeFlow.Models.MedicalRecord>
+
+@{
+    ViewData["Title"] = "Medical History";
+}
+
+<div class="container mt-4">
+    <h2>Medical History - @ViewBag.PatientName</h2>
+    <hr />
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            No medical records found for this patient.
+        </div>
+    }
+    else
+    {
+        <table class="table table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>Date</th>
+                    <th>Doctor</th>
+                    <th>Reason for Visit</th>
+                    <th>Diagnosis</th>
+                    <th>Treatment</th>
+                    <th>Prescription</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var record in Model)
+                {
+                    <tr>
+                        <td>@record.RecordDate.ToString("yyyy-MM-dd")</td>
+                        <td>@record.Doctor?.FullName</td>
+                        <td>@record.ReasonForVisit</td>
+                        <td>@record.Diagnosis</td>
+                        <td>@record.Treatment</td>
+                        <td>@record.Prescription</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+    <div class="mt-3">
+        <a asp-action="ViewPatients" class="btn btn-secondary">Back to Patients</a>
+    </div>
+</div>

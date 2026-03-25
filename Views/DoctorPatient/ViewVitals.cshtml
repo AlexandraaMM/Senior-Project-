@@ -1,0 +1,39 @@
+@model IEnumerable<PracticeFlow.Models.VitalsLog>
+@{
+    ViewData["Title"] = "Vitals History";
+}
+<div class="container mt-4">
+    <h2>Vitals History - @ViewBag.PatientName</h2>
+    <hr />
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">No vitals recorded yet.</div>
+    }
+    else
+    {
+        <table class="table table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>Date</th>
+                    <th>Weight</th>
+                    <th>Height</th>
+                    <th>BMI</th>
+                    <th>Category</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var vital in Model)
+            {
+                <tr>
+                    <td>@vital.RecordedDate.ToString("MMM dd, yyyy")</td>
+                    <td>@vital.Weight_kg kg</td>
+                    <td>@vital.Height_cm cm</td>
+                    <td>@vital.BMI?.ToString("F1")</td>
+                    <td><span class="badge bg-success">@vital.BMICategory</span></td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    }
+    <a asp-action="ViewPatients" class="btn btn-secondary">Back</a>
+</div>

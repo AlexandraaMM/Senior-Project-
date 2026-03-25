@@ -37,7 +37,7 @@ namespace INF_SP.Controllers
             return View(records);
         }
 
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
             // Check if user is logged in
             if (HttpContext.Session.GetString("UserId") == null)
@@ -52,22 +52,16 @@ namespace INF_SP.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
-            // Get doctor's patients from appointments
-            var doctorId = int.Parse(HttpContext.Session.GetString("UserId"));
-            var patients = _context.Appointments
-                .Where(a => a.DoctorId == doctorId)
-                .Select(a => a.PatientId)
-                .Distinct()
-                .ToList();
-
-            var patientList = _context.Users
-                .Where(u => patients.Contains(u.UserID))
+            // Get all patients in the system
+            var patientList = await _context.Users
+                .Where(u => u.Role == "Patient")
+                .OrderBy(u => u.FullName)
                 .Select(u => new SelectListItem
                 {
                     Value = u.UserID.ToString(),
                     Text = u.FullName
                 })
-                .ToList();
+                .ToListAsync();
 
             ViewBag.Patients = patientList;
             return View();
@@ -75,12 +69,11 @@ namespace INF_SP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(MedicalRecord record)
+        public async Task<IActionResult> Create(MedicalRecord record)
         {
             // Check if user is logged in
             if (HttpContext.Session.GetString("UserId") == null)
             {
-                Console.WriteLine("❌ User not logged in");
                 return RedirectToAction("Login", "Account");
             }
 
@@ -88,61 +81,31 @@ namespace INF_SP.Controllers
             var role = HttpContext.Session.GetString("Role");
             if (role != "Doctor")
             {
-                Console.WriteLine("❌ User is not a doctor: " + role);
                 return RedirectToAction("Index", "Home");
             }
 
             record.DoctorId = int.Parse(HttpContext.Session.GetString("UserId"));
             record.RecordDate = DateTime.Now;
 
-            Console.WriteLine("🔍 Submitted Data:");
-            Console.WriteLine("   PatientId: " + record.PatientId);
-            Console.WriteLine("   DoctorId: " + record.DoctorId);
-            Console.WriteLine("   ReasonForVisit: " + record.ReasonForVisit);
-            Console.WriteLine("   Diagnosis: " + record.Diagnosis);
-            Console.WriteLine("   ModelState.IsValid: " + ModelState.IsValid);
-
             if (!ModelState.IsValid)
             {
-                Console.WriteLine("❌ Validation errors:");
-                foreach (var key in ModelState.Keys)
-                {
-                    var errors = ModelState[key].Errors;
-                    if (errors.Count > 0)
-                    {
-                        Console.WriteLine($"   Field '{key}':");
-                        foreach (var error in errors)
-                        {
-                            Console.WriteLine($"      - {error.ErrorMessage}");
-                        }
-                    }
-                }
-                
-                // Reload patient list
-                var doctorId = int.Parse(HttpContext.Session.GetString("UserId"));
-                var patients = _context.Appointments
-                    .Where(a => a.DoctorId == doctorId)
-                    .Select(a => a.PatientId)
-                    .Distinct()
-                    .ToList();
-
-                var patientList = _context.Users
-                    .Where(u => patients.Contains(u.UserID))
+                // Reload all patients
+                var patientList = await _context.Users
+                    .Where(u => u.Role == "Patient")
+                    .OrderBy(u => u.FullName)
                     .Select(u => new SelectListItem
                     {
                         Value = u.UserID.ToString(),
                         Text = u.FullName
                     })
-                    .ToList();
+                    .ToListAsync();
 
                 ViewBag.Patients = patientList;
                 return View(record);
             }
 
-            Console.WriteLine("✅ Validation passed! Saving to database...");
             _context.MedicalRecords.Add(record);
-            _context.SaveChanges();
-            Console.WriteLine("✅ Record saved! RecordId: " + record.RecordId);
+            await _context.SaveChangesAsync();
 
             TempData["Success"] = "Medical record created successfully!";
             return RedirectToAction("DoctorDashboard", "Home");

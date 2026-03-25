@@ -34,7 +34,6 @@ namespace PracticeFlow.Models
         [StringLength(255)]
         public string PasswordHash { get; set; }
         
-        [Required]
         [StringLength(20)]
         public string Role { get; set; }
         

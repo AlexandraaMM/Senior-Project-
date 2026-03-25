@@ -1,3 +1,12 @@
+/Users/alexandramihaylova/Desktop/AUBG/8th semester/Senior Thesis/INF_SP/obj/Debug/net8.0/INF_SP.csproj.AssemblyReference.cache
+/Users/alexandramihaylova/Desktop/AUBG/8th semester/Senior Thesis/INF_SP/obj/Debug/net8.0/INF_SP.GeneratedMSBuildEditorConfig.editorconfig
+/Users/alexandramihaylova/Desktop/AUBG/8th semester/Senior Thesis/INF_SP/obj/Debug/net8.0/INF_SP.AssemblyInfoInputs.cache
+/Users/alexandramihaylova/Desktop/AUBG/8th semester/Senior Thesis/INF_SP/obj/Debug/net8.0/INF_SP.AssemblyInfo.cs
+/Users/alexandramihaylova/Desktop/AUBG/8th semester/Senior Thesis/INF_SP/obj/Debug/net8.0/INF_SP.csproj.CoreCompileInputs.cache
+/Users/alexandramihaylova/Desktop/AUBG/8th semester/Senior Thesis/INF_SP/obj/Debug/net8.0/INF_SP.MvcApplicationPartsAssemblyInfo.cache
+/Users/alexandramihaylova/Desktop/AUBG/8th semester/Senior Thesis/INF_SP/obj/Debug/net8.0/INF_SP.RazorAssemblyInfo.cache
+/Users/alexandramihaylova/Desktop/AUBG/8th semester/Senior Thesis/INF_SP/obj/Debug/net8.0/INF_SP.RazorAssemblyInfo.cs
+/Users/alexandramihaylova/Desktop/AUBG/8th semester/Senior Thesis/INF_SP/obj/Debug/net8.0/INF_SP.sourcelink.json
 /Users/alexandramihaylova/Desktop/AUBG/8th semester/Senior Thesis/INF_SP/bin/Debug/net8.0/appsettings.Development.json
 /Users/alexandramihaylova/Desktop/AUBG/8th semester/Senior Thesis/INF_SP/bin/Debug/net8.0/appsettings.json
 /Users/alexandramihaylova/Desktop/AUBG/8th semester/Senior Thesis/INF_SP/bin/Debug/net8.0/global.json
@@ -7,6 +16,7 @@
 /Users/alexandramihaylova/Desktop/AUBG/8th semester/Senior Thesis/INF_SP/bin/Debug/net8.0/INF_SP.runtimeconfig.json
 /Users/alexandramihaylova/Desktop/AUBG/8th semester/Senior Thesis/INF_SP/bin/Debug/net8.0/INF_SP.dll
 /Users/alexandramihaylova/Desktop/AUBG/8th semester/Senior Thesis/INF_SP/bin/Debug/net8.0/INF_SP.pdb
+/Users/alexandramihaylova/Desktop/AUBG/8th semester/Senior Thesis/INF_SP/bin/Debug/net8.0/BCrypt.Net-Next.dll
 /Users/alexandramihaylova/Desktop/AUBG/8th semester/Senior Thesis/INF_SP/bin/Debug/net8.0/Humanizer.dll
 /Users/alexandramihaylova/Desktop/AUBG/8th semester/Senior Thesis/INF_SP/bin/Debug/net8.0/Microsoft.Bcl.AsyncInterfaces.dll
 /Users/alexandramihaylova/Desktop/AUBG/8th semester/Senior Thesis/INF_SP/bin/Debug/net8.0/Microsoft.CodeAnalysis.dll
@@ -108,15 +118,6 @@
 /Users/alexandramihaylova/Desktop/AUBG/8th semester/Senior Thesis/INF_SP/bin/Debug/net8.0/runtimes/win-arm64/native/e_sqlite3.dll
 /Users/alexandramihaylova/Desktop/AUBG/8th semester/Senior Thesis/INF_SP/bin/Debug/net8.0/runtimes/win-x64/native/e_sqlite3.dll
 /Users/alexandramihaylova/Desktop/AUBG/8th semester/Senior Thesis/INF_SP/bin/Debug/net8.0/runtimes/win-x86/native/e_sqlite3.dll
-/Users/alexandramihaylova/Desktop/AUBG/8th semester/Senior Thesis/INF_SP/obj/Debug/net8.0/INF_SP.csproj.AssemblyReference.cache
-/Users/alexandramihaylova/Desktop/AUBG/8th semester/Senior Thesis/INF_SP/obj/Debug/net8.0/INF_SP.GeneratedMSBuildEditorConfig.editorconfig
-/Users/alexandramihaylova/Desktop/AUBG/8th semester/Senior Thesis/INF_SP/obj/Debug/net8.0/INF_SP.AssemblyInfoInputs.cache
-/Users/alexandramihaylova/Desktop/AUBG/8th semester/Senior Thesis/INF_SP/obj/Debug/net8.0/INF_SP.AssemblyInfo.cs
-/Users/alexandramihaylova/Desktop/AUBG/8th semester/Senior Thesis/INF_SP/obj/Debug/net8.0/INF_SP.csproj.CoreCompileInputs.cache
-/Users/alexandramihaylova/Desktop/AUBG/8th semester/Senior Thesis/INF_SP/obj/Debug/net8.0/INF_SP.MvcApplicationPartsAssemblyInfo.cache
-/Users/alexandramihaylova/Desktop/AUBG/8th semester/Senior Thesis/INF_SP/obj/Debug/net8.0/INF_SP.RazorAssemblyInfo.cache
-/Users/alexandramihaylova/Desktop/AUBG/8th semester/Senior Thesis/INF_SP/obj/Debug/net8.0/INF_SP.RazorAssemblyInfo.cs
-/Users/alexandramihaylova/Desktop/AUBG/8th semester/Senior Thesis/INF_SP/obj/Debug/net8.0/INF_SP.sourcelink.json
 /Users/alexandramihaylova/Desktop/AUBG/8th semester/Senior Thesis/INF_SP/obj/Debug/net8.0/staticwebassets.build.json
 /Users/alexandramihaylova/Desktop/AUBG/8th semester/Senior Thesis/INF_SP/obj/Debug/net8.0/staticwebassets.development.json
 /Users/alexandramihaylova/Desktop/AUBG/8th semester/Senior Thesis/INF_SP/obj/Debug/net8.0/staticwebassets/msbuild.INF_SP.Microsoft.AspNetCore.StaticWebAssets.props

@@ -1,7 +1,6 @@
+using BCrypt.Net;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Cryptography;
-using System.Text;
 using PracticeFlow.Models;
 using PracticeFlow.Data;
 
@@ -16,13 +15,11 @@ namespace INF_SP.Controllers
             _context = context;
         }
 
-        
         public IActionResult Login()
         {
             return View();
         }
 
-        
         [HttpPost]
         public async Task<IActionResult> Login(string username, string passwordHash)
         {
@@ -32,13 +29,12 @@ namespace INF_SP.Controllers
                 return View();
             }
 
-            // Hash the password 
-            var hashedPassword = HashPassword(passwordHash);
-
+            // Find user by username
             var user = await _context.Users
-                .FirstOrDefaultAsync(u => u.Username == username && u.PasswordHash == hashedPassword);
+                .FirstOrDefaultAsync(u => u.Username == username);
 
-            if (user == null)
+            // Verify password with BCrypt
+            if (user == null || !BCrypt.Net.BCrypt.Verify(passwordHash, user.PasswordHash))
             {
                 ViewBag.Error = "Invalid username or password";
                 return View();
@@ -50,7 +46,6 @@ namespace INF_SP.Controllers
             HttpContext.Session.SetString("Role", user.Role);
             HttpContext.Session.SetString("FullName", user.FullName);
 
-            
             switch (user.Role)
             {
                 case "Admin":
@@ -64,16 +59,19 @@ namespace INF_SP.Controllers
             }
         }
 
-        
         public IActionResult Register()
         {
             return View();
         }
 
-        
         [HttpPost]
-        public async Task<IActionResult> Register(User user)
+        public async Task<IActionResult> Register(User user, string Password)
         {
+            user.Role = "Patient";
+
+            // Hash password 
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(Password);
+
             if (ModelState.IsValid)
             {
                 // Check if username exists
@@ -90,9 +88,6 @@ namespace INF_SP.Controllers
                     return View(user);
                 }
 
-                // Hash password
-                user.PasswordHash = HashPassword(user.PasswordHash);
-
                 // Add to database
                 _context.Users.Add(user);
                 await _context.SaveChangesAsync();
@@ -103,37 +98,17 @@ namespace INF_SP.Controllers
                 HttpContext.Session.SetString("Role", user.Role);
                 HttpContext.Session.SetString("FullName", user.FullName);
 
-                
-                switch (user.Role)
-                {
-                    case "Admin":
-                        return RedirectToAction("AdminDashboard", "Home");
-                    case "Doctor":
-                        return RedirectToAction("DoctorDashboard", "Home");
-                    case "Patient":
-                        return RedirectToAction("PatientDashboard", "Home");
-                    default:
-                        return RedirectToAction("Index", "Home");
-                }
+                // Always redirect to Patient Dashboard 
+                return RedirectToAction("PatientDashboard", "Home");
             }
 
             return View(user);
         }
 
-   
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();
             return RedirectToAction("Login");
-        }
-
-        private string HashPassword(string password)
-        {
-            using (var sha256 = SHA256.Create())
-            {
-                var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
-                return Convert.ToBase64String(hashedBytes);
-            }
         }
     }
 }

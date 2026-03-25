@@ -38,8 +38,8 @@
                             <td>@record.ReasonForVisit</td>
                             <td>@record.Diagnosis</td>
                             <td>
-                                <a href="#" class="btn btn-sm btn-primary">View Details</a>
-                                <a href="#" class="btn btn-sm btn-success">Add Prescription</a>
+                                <a asp-action="ViewDetails" asp-route-id="@record.RecordId" class="btn btn-sm btn-primary">View Details</a>
+                                <a asp-action="AddPrescription" asp-route-id="@record.RecordId" class="btn btn-sm btn-success">Add Prescription</a>
                             </td>
                         </tr>
                     }

@@ -9,8 +9,7 @@ namespace PracticeFlow.Models
         [Key]
         public int VitalID { get; set; }  
         
-        [Required]
-        public int RecordId { get; set; }  
+        public int? RecordId { get; set; }  
         [Required]
         public int PatientID { get; set; }  
         

@@ -1,9 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "00BrPT0Pjwo=",
+  "dgSpecHash": "dPzrNRSDebY=",
   "success": true,
   "projectFilePath": "/Users/alexandramihaylova/Desktop/AUBG/8th semester/Senior Thesis/INF_SP/INF_SP.csproj",
   "expectedPackageFiles": [
+    "/Users/alexandramihaylova/.nuget/packages/bcrypt.net-next/4.1.0/bcrypt.net-next.4.1.0.nupkg.sha512",
     "/Users/alexandramihaylova/.nuget/packages/humanizer.core/2.14.1/humanizer.core.2.14.1.nupkg.sha512",
     "/Users/alexandramihaylova/.nuget/packages/microsoft.bcl.asyncinterfaces/6.0.0/microsoft.bcl.asyncinterfaces.6.0.0.nupkg.sha512",
     "/Users/alexandramihaylova/.nuget/packages/microsoft.codeanalysis.analyzers/3.3.3/microsoft.codeanalysis.analyzers.3.3.3.nupkg.sha512",
