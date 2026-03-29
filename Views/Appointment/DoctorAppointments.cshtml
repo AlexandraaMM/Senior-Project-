@@ -7,8 +7,19 @@
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>My Appointment Schedule</h2>
-        <a asp-controller="Home" asp-action="DoctorDashboard" class="btn btn-secondary">Back to Dashboard</a>
+        <div>
+            <a asp-controller="DoctorMedicalRecord" asp-action="ViewRecords" class="btn btn-primary">Medical Records</a>
+            <a asp-controller="Home" asp-action="DoctorDashboard" class="btn btn-secondary">Back to Dashboard</a>
+        </div>
     </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
 
     @if (!Model.Any())
     {
@@ -43,20 +54,61 @@
                             </td>
                             <td>@appointment.Reason</td>
                             <td>
-                                <span class="badge bg-@(appointment.Status == "Scheduled" ? "primary" : 
-                                                       appointment.Status == "Completed" ? "success" : "danger")">
-                                    @appointment.Status
-                                </span>
+                                @{
+                                    var today = DateTime.Today;
+                                    var appointmentDate = appointment.AppointmentDate.Date;
+                                    
+                                    string statusText;
+                                    string badgeColor;
+                                    
+                                    
+                                    if (appointment.Status == "Cancelled")
+                                    {
+                                        statusText = "Cancelled";
+                                        badgeColor = "danger";
+                                    }
+                                    else if (appointment.Status == "Completed")
+                                    {
+                                        statusText = "Completed";
+                                        badgeColor = "secondary";
+                                    }
+                                    else if (appointmentDate == today)
+                                    {
+                                        statusText = "Today";
+                                        badgeColor = "warning";
+                                    }
+                                    else if (appointmentDate < today)
+                                    {
+                                        statusText = "Past Due";
+                                        badgeColor = "secondary";
+                                    }
+                                    else
+                                    {
+                                        statusText = "Scheduled";
+                                        badgeColor = "primary";
+                                    }
+                                }
+                                <span class="badge bg-@badgeColor">@statusText</span>
                             </td>
                             <td>
                                 @if (appointment.Status == "Scheduled")
                                 {
-                                    <a href="#" class="btn btn-sm btn-success">Record Visit</a>
-                                    <a href="#" class="btn btn-sm btn-danger">Cancel</a>
+                                    <a asp-action="RecordVisit" asp-route-id="@appointment.AppointmentId" class="btn btn-sm btn-success">Record Visit</a>
+                                    <a asp-action="CancelAppointment" asp-route-id="@appointment.AppointmentId" class="btn btn-sm btn-danger" 
+                                       onclick="return confirm('Cancel this appointment?');">Cancel</a>
                                 }
                                 else if (appointment.Status == "Completed")
                                 {
-                                    <a href="#" class="btn btn-sm btn-info">View Record</a>
+                                    @if (ViewBag.AppointmentRecordMap != null && 
+                                         ((Dictionary<int, int>)ViewBag.AppointmentRecordMap).ContainsKey(appointment.AppointmentId))
+                                    {
+                                        var recordId = ((Dictionary<int, int>)ViewBag.AppointmentRecordMap)[appointment.AppointmentId];
+                                        <a asp-controller="DoctorMedicalRecord" asp-action="ViewDetails" asp-route-id="@recordId" class="btn btn-sm btn-info">View Record</a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">No record found</span>
+                                    }
                                 }
                             </td>
                         </tr>

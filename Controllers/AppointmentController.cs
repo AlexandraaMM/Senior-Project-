@@ -38,7 +38,6 @@ namespace INF_SP.Controllers
             }
             catch (Exception ex)
             {
-                // Log error
                 Console.WriteLine($"Error in MyAppointments: {ex.Message}");
                 return View(new List<Appointment>());
             }
@@ -64,6 +63,27 @@ namespace INF_SP.Controllers
                     .Where(a => a.DoctorId == doctorId)
                     .OrderByDescending(a => a.AppointmentDate)
                     .ToListAsync();
+
+                // Get medical records created on the same day as the appointment
+                var medicalRecords = await _context.MedicalRecords
+                    .Where(r => r.DoctorId == doctorId)
+                    .ToListAsync();
+
+                
+                var appointmentRecordMap = new Dictionary<int, int>();
+                foreach (var appointment in appointments.Where(a => a.Status == "Completed"))
+                {
+                    var record = medicalRecords.FirstOrDefault(r => 
+                        r.PatientId == appointment.PatientId &&
+                        r.RecordDate.Date == appointment.AppointmentDate.Date);
+                    
+                    if (record != null)
+                    {
+                        appointmentRecordMap[appointment.AppointmentId] = record.RecordId;
+                    }
+                }
+
+                ViewBag.AppointmentRecordMap = appointmentRecordMap;
                 
                 return View(appointments);
             }
@@ -74,7 +94,6 @@ namespace INF_SP.Controllers
             }
         }
 
-        
         [HttpGet]
         public async Task<IActionResult> Book()
         {
@@ -112,7 +131,7 @@ namespace INF_SP.Controllers
 
         // Book new appointment
         [HttpPost]
-        public async Task<IActionResult> Book(Appointment appointment)
+        public async Task<IActionResult> Book(int DoctorId, string AppointmentDate, string AppointmentTime, string Reason)
         {
             try
             {
@@ -125,43 +144,48 @@ namespace INF_SP.Controllers
                     return RedirectToAction("Login", "Account");
                 }
 
-                
-                if (!ModelState.IsValid)
+                // Validate doctor selection
+                if (DoctorId <= 0)
                 {
-                    ViewBag.Doctors = await _context.Users
-                        .Where(u => u.Role == "Doctor")
-                        .OrderBy(u => u.FullName)
-                        .ToListAsync();
-                    return View(appointment);
+                    ViewBag.ErrorMessage = "Please select a doctor";
+                    ViewBag.Doctors = await _context.Users.Where(u => u.Role == "Doctor").ToListAsync();
+                    return View();
                 }
 
-                
-                if (appointment.DoctorId <= 0)
+                DateTime appointmentDateTime;
+                try
                 {
-                    ModelState.AddModelError("DoctorId", "Please select a doctor");
-                    ViewBag.Doctors = await _context.Users
-                        .Where(u => u.Role == "Doctor")
-                        .OrderBy(u => u.FullName)
-                        .ToListAsync();
-                    return View(appointment);
+                    var dateOnly = DateTime.Parse(AppointmentDate);
+                    var timeParts = AppointmentTime.Split(':');
+                    appointmentDateTime = new DateTime(
+                        dateOnly.Year, dateOnly.Month, dateOnly.Day,
+                        int.Parse(timeParts[0]), int.Parse(timeParts[1]), 0
+                    );
+                }
+                catch
+                {
+                    ViewBag.ErrorMessage = "Invalid date or time format";
+                    ViewBag.Doctors = await _context.Users.Where(u => u.Role == "Doctor").ToListAsync();
+                    return View();
                 }
 
-                
-                if (appointment.AppointmentDate == default || appointment.AppointmentDate < DateTime.Now)
+                // Validate future date
+                if (appointmentDateTime < DateTime.Now)
                 {
-                    ModelState.AddModelError("AppointmentDate", "Please select a valid future date and time");
-                    ViewBag.Doctors = await _context.Users
-                        .Where(u => u.Role == "Doctor")
-                        .OrderBy(u => u.FullName)
-                        .ToListAsync();
-                    return View(appointment);
+                    ViewBag.ErrorMessage = "Cannot book appointments for past dates. Please select a future date and time.";
+                    ViewBag.Doctors = await _context.Users.Where(u => u.Role == "Doctor").ToListAsync();
+                    return View();
                 }
 
-                
-                appointment.PatientId = int.Parse(userIdString);
-                appointment.Status = "Scheduled";
-                
-                appointment.Reason = appointment.Reason ?? string.Empty;
+                // Create appointment
+                var appointment = new Appointment
+                {
+                    PatientId = int.Parse(userIdString),
+                    DoctorId = DoctorId,
+                    AppointmentDate = appointmentDateTime,
+                    Reason = Reason ?? string.Empty,
+                    Status = "Scheduled"
+                };
 
                 _context.Appointments.Add(appointment);
                 await _context.SaveChangesAsync();
@@ -169,32 +193,70 @@ namespace INF_SP.Controllers
                 TempData["SuccessMessage"] = "Appointment booked successfully!";
                 return RedirectToAction("MyAppointments");
             }
-            catch (DbUpdateException dbEx)
-            {
-                Console.WriteLine($"Database error: {dbEx.InnerException?.Message ?? dbEx.Message}");
-                ModelState.AddModelError("", "Unable to save appointment. Please try again.");
-                
-                ViewBag.Doctors = await _context.Users
-                    .Where(u => u.Role == "Doctor")
-                    .OrderBy(u => u.FullName)
-                    .ToListAsync();
-                
-                return View(appointment);
-            }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error in Book POST: {ex.Message}");
-                Console.WriteLine($"Stack trace: {ex.StackTrace}");
-                
-                ModelState.AddModelError("", "An unexpected error occurred. Please try again.");
-                
-                ViewBag.Doctors = await _context.Users
-                    .Where(u => u.Role == "Doctor")
-                    .OrderBy(u => u.FullName)
-                    .ToListAsync();
-                
-                return View(appointment);
+                ViewBag.ErrorMessage = "An error occurred while booking the appointment. Please try again.";
+                ViewBag.Doctors = await _context.Users.Where(u => u.Role == "Doctor").ToListAsync();
+                return View();
             }
+        }
+
+        // Record visit from appointment
+        public async Task<IActionResult> RecordVisit(int id)
+        {
+            var userIdString = HttpContext.Session.GetString("UserId");
+            var role = HttpContext.Session.GetString("Role");
+            
+            if (string.IsNullOrEmpty(userIdString) || role != "Doctor")
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var appointment = await _context.Appointments
+                .Include(a => a.Patient)
+                .FirstOrDefaultAsync(a => a.AppointmentId == id);
+
+            if (appointment == null)
+            {
+                TempData["Error"] = "Appointment not found";
+                return RedirectToAction("DoctorAppointments");
+            }
+
+            // Mark appointment as completed
+            appointment.Status = "Completed";
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Create", "MedicalRecord", new { 
+                patientId = appointment.PatientId, 
+                reason = appointment.Reason 
+            });
+        }
+
+        // Cancel Appointment
+        public async Task<IActionResult> CancelAppointment(int id)
+        {
+            var userIdString = HttpContext.Session.GetString("UserId");
+            var role = HttpContext.Session.GetString("Role");
+            
+            if (string.IsNullOrEmpty(userIdString) || role != "Doctor")
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var appointment = await _context.Appointments.FindAsync(id);
+
+            if (appointment == null)
+            {
+                TempData["Error"] = "Appointment not found";
+                return RedirectToAction("DoctorAppointments");
+            }
+
+            appointment.Status = "Cancelled";
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Appointment cancelled successfully";
+            return RedirectToAction("DoctorAppointments");
         }
     }
 }
