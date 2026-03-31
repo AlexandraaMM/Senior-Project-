@@ -1,29 +1,90 @@
 @model PracticeFlow.Models.Appointment
-
 @{
     ViewData["Title"] = "Book Appointment";
 }
 
-<h2>Book New Appointment</h2>
+<div class="container mt-4">
+    <h2>Book New Appointment</h2>
+    <hr />
 
-<form asp-action="Book" method="post">
-    <div class="form-group">
-        <label asp-for="DoctorId">Select Doctor</label>
-        <select asp-for="DoctorId" class="form-control" asp-items="@(new SelectList(ViewBag.Doctors, "UserID", "FullName"))" required>
-            <option value="">-- Select Doctor --</option>
-        </select>
-    </div>
+    @if (ViewBag.ErrorMessage != null)
+    {
+        <div class="alert alert-danger">
+            @ViewBag.ErrorMessage
+        </div>
+    }
 
-    <div class="form-group">
-        <label asp-for="AppointmentDate">Appointment Date & Time</label>
-        <input asp-for="AppointmentDate" type="datetime-local" class="form-control" required />
-    </div>
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger">
+            <strong>Please fix the following errors:</strong>
+            <ul>
+                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <li>@error.ErrorMessage</li>
+                }
+            </ul>
+        </div>
+    }
 
-    <div class="form-group">
-        <label asp-for="Reason">Reason for Visit</label>
-        <textarea asp-for="Reason" class="form-control" rows="3" required></textarea>
-    </div>
+    <form asp-action="Book" method="post">
+        <div class="form-group mb-3">
+            <label>Select Doctor *</label>
+            <select name="DoctorId" class="form-control" required>
+                <option value="">-- Select Doctor --</option>
+                @foreach (var doctor in ViewBag.Doctors)
+                {
+                    <option value="@doctor.UserID">@doctor.FullName</option>
+                }
+            </select>
+        </div>
 
-    <button type="submit" class="btn btn-primary">Book Appointment</button>
-    <a href="/Appointment/MyAppointments" class="btn btn-secondary">Cancel</a>
-</form>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group mb-3">
+                    <label>Appointment Date *</label>
+                    <input type="date" name="AppointmentDate" class="form-control" 
+                           min="@DateTime.Now.ToString("yyyy-MM-dd")" 
+                           value="@DateTime.Now.ToString("yyyy-MM-dd")" required />
+                    <small class="text-muted">Please select a future date</small>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group mb-3">
+                    <label>Appointment Time *</label>
+                    <select name="AppointmentTime" class="form-control" required>
+                        <option value="">-- Select Time --</option>
+                        <option value="09:00">9:00 AM</option>
+                        <option value="09:30">9:30 AM</option>
+                        <option value="10:00">10:00 AM</option>
+                        <option value="10:30">10:30 AM</option>
+                        <option value="11:00">11:00 AM</option>
+                        <option value="11:30">11:30 AM</option>
+                        <option value="12:00">12:00 PM</option>
+                        <option value="12:30">12:30 PM</option>
+                        <option value="13:00">1:00 PM</option>
+                        <option value="13:30">1:30 PM</option>
+                        <option value="14:00">2:00 PM</option>
+                        <option value="14:30">2:30 PM</option>
+                        <option value="15:00">3:00 PM</option>
+                        <option value="15:30">3:30 PM</option>
+                        <option value="16:00">4:00 PM</option>
+                        <option value="16:30">4:30 PM</option>
+                        <option value="17:00">5:00 PM</option>
+                    </select>
+                    <small class="text-muted">Office hours: 9:00 AM - 5:00 PM</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group mb-3">
+            <label>Reason for Visit *</label>
+            <textarea name="Reason" class="form-control" rows="3" placeholder="Describe your symptoms or reason for visit" required></textarea>
+        </div>
+
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">Book Appointment</button>
+            <a asp-action="MyAppointments" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>

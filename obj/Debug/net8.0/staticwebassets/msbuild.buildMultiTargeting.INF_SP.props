@@ -1,3 +1,0 @@
-﻿<Project>
-  <Import Project="../build/INF_SP.props" />
-</Project>

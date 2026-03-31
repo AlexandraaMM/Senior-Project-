@@ -45,7 +45,6 @@ namespace PracticeFlow.Models
             }
         }
         
-        // Helper property to get BMI category
         [NotMapped]
         public string BMICategory
         {

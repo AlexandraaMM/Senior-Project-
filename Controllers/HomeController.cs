@@ -89,7 +89,7 @@ namespace INF_SP.Controllers
             }
 
     // Get the patient's data from database
-    var userId = int.Parse(HttpContext.Session.GetString("UserId"));
+    var userId = int.Parse(HttpContext.Session.GetString("UserId")!);
     var patient = await _context.Users.FindAsync(userId);
     
     // Pass the model to the view

@@ -54,12 +54,24 @@ namespace INF_SP.Controllers
                 .Include(r => r.Patient)
                 .Include(r => r.Doctor)
                 .FirstOrDefaultAsync(r => r.RecordId == id);
-            
+
             if (record == null)
             {
                 TempData["Error"] = "Medical record not found";
                 return RedirectToAction("ViewRecords");
             }
+
+            // Load prescriptions for this record
+            ViewBag.Prescriptions = await _context.Prescriptions
+                .Where(p => p.RecordId == id)
+                .ToListAsync();
+
+            // Load patient's vitals history 
+            ViewBag.VitalsHistory = await _context.VitalsLogs
+                .Where(v => v.PatientID == record.PatientId)
+                .OrderByDescending(v => v.RecordedDate)
+                .Take(10)
+                .ToListAsync();
 
             return View(record);
         }
@@ -87,12 +99,12 @@ namespace INF_SP.Controllers
             }
 
             ViewBag.RecordId = id;
-            ViewBag.PatientName = record.Patient.FullName;
+            ViewBag.PatientName = record.Patient!.FullName;
             ViewBag.PatientID = record.PatientId;
             return View();
         }
 
-        // Add prescription
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddPrescription(Prescription prescription)
@@ -114,7 +126,7 @@ namespace INF_SP.Controllers
                 await _context.SaveChangesAsync();
 
                 TempData["Success"] = "Prescription added successfully!";
-                return RedirectToAction("ViewRecords");
+                return RedirectToAction("ViewDetails", new { id = prescription.RecordId });
             }
 
             var record = await _context.MedicalRecords
@@ -122,7 +134,7 @@ namespace INF_SP.Controllers
                 .FirstOrDefaultAsync(r => r.RecordId == prescription.RecordId);
             
             ViewBag.RecordId = prescription.RecordId;
-            ViewBag.PatientName = record?.Patient.FullName;
+            ViewBag.PatientName = record?.Patient!.FullName;
             ViewBag.PatientID = record?.PatientId;
             return View(prescription);
         }

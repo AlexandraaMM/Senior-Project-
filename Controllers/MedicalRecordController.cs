@@ -68,47 +68,67 @@ namespace INF_SP.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(MedicalRecord record)
-        {
-            // Check if user is logged in
-            if (HttpContext.Session.GetString("UserId") == null)
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> Create(MedicalRecord record, Prescription Prescription)
+{
+    // Check if user is logged in
+    if (HttpContext.Session.GetString("UserId") == null)
+    {
+        return RedirectToAction("Login", "Account");
+    }
+
+    // Check if user is a doctor
+    var role = HttpContext.Session.GetString("Role");
+    if (role != "Doctor")
+    {
+        return RedirectToAction("Index", "Home");
+    }
+
+    record.DoctorId = int.Parse(HttpContext.Session.GetString("UserId")!);
+    record.RecordDate = DateTime.Now;
+
+    // Remove prescription validation errors if no medication name provided
+    if (string.IsNullOrWhiteSpace(Prescription.MedicationName))
+    {
+        ModelState.Remove("Prescription.MedicationName");
+        ModelState.Remove("Prescription.Dosage");
+        ModelState.Remove("Prescription.Instructions");
+    }
+
+    if (!ModelState.IsValid)
+    {
+        // Reload all patients
+        var patientList = await _context.Users
+            .Where(u => u.Role == "Patient")
+            .OrderBy(u => u.FullName)
+            .Select(u => new SelectListItem
             {
-                return RedirectToAction("Login", "Account");
-            }
+                Value = u.UserID.ToString(),
+                Text = u.FullName
+            })
+            .ToListAsync();
 
-            // Check if user is a doctor
-            var role = HttpContext.Session.GetString("Role");
-            if (role != "Doctor")
-            {
-                return RedirectToAction("Index", "Home");
-            }
+        ViewBag.Patients = patientList;
+        return View(record);
+    }
 
-            record.DoctorId = int.Parse(HttpContext.Session.GetString("UserId"));
-            record.RecordDate = DateTime.Now;
+    // Save medical record first
+    _context.MedicalRecords.Add(record);
+    await _context.SaveChangesAsync();
 
-            if (!ModelState.IsValid)
-            {
-                // Reload all patients
-                var patientList = await _context.Users
-                    .Where(u => u.Role == "Patient")
-                    .OrderBy(u => u.FullName)
-                    .Select(u => new SelectListItem
-                    {
-                        Value = u.UserID.ToString(),
-                        Text = u.FullName
-                    })
-                    .ToListAsync();
+    // Save prescription if medication name is provided
+    if (!string.IsNullOrWhiteSpace(Prescription.MedicationName))
+    {
+        Prescription.RecordId = record.RecordId;
+        Prescription.PatientID = record.PatientId;
+        Prescription.CreatedDate = DateTime.Now;
+        
+        _context.Prescriptions.Add(Prescription);
+        await _context.SaveChangesAsync();
+    }
 
-                ViewBag.Patients = patientList;
-                return View(record);
-            }
-
-            _context.MedicalRecords.Add(record);
-            await _context.SaveChangesAsync();
-
-            TempData["Success"] = "Medical record created successfully!";
-            return RedirectToAction("DoctorDashboard", "Home");
-        }
+    TempData["Success"] = "Medical record created successfully!";
+    return RedirectToAction("DoctorAppointments", "Appointment");
+}
     }
 }

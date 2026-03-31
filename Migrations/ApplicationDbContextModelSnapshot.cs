@@ -89,21 +89,18 @@ namespace INF_SP.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Diagnosis")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<int>("DoctorId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Notes")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<int>("PatientId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Prescription")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ReasonForVisit")
@@ -115,7 +112,6 @@ namespace INF_SP.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Treatment")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("RecordId");

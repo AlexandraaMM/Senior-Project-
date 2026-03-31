@@ -21,13 +21,13 @@ namespace PracticeFlow.Models
         [StringLength(200)]
         public string ReasonForVisit { get; set; } = string.Empty;  
         
-        public string Diagnosis { get; set; } = string.Empty;  // Doctor's diagnosis
+        public string? Diagnosis { get; set; } = string.Empty;  // Doctor's diagnosis
         
-        public string Treatment { get; set; } = string.Empty;  // Treatment plan
+        public string? Treatment { get; set; } = string.Empty;  // Treatment plan
         
-        public string Prescription { get; set; } = string.Empty;  // Medications prescribed
+        public string? Prescription { get; set; } = string.Empty;  // Medications prescribed
         
-        public string Notes { get; set; } = string.Empty;  
+        public string? Notes { get; set; } = string.Empty;  
         
         // Foreign key relationships
         [ForeignKey("PatientId")]
