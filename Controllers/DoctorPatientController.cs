@@ -25,9 +25,17 @@ namespace INF_SP.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            // Get all patients in the system
+            int doctorId = int.Parse(userIdString);
+
+            // Get only patients who have appointments with this doctor
+            var patientIds = await _context.Appointments
+                .Where(a => a.DoctorId == doctorId)
+                .Select(a => a.PatientId)
+                .Distinct()
+                .ToListAsync();
+
             var patients = await _context.Users
-                .Where(u => u.Role == "Patient")
+                .Where(u => patientIds.Contains(u.UserID) && u.Role == "Patient")
                 .OrderBy(p => p.FullName)
                 .ToListAsync();
 

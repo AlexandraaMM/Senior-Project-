@@ -37,7 +37,7 @@ namespace INF_SP.Controllers
             return View(records);
         }
 
-        public async Task<IActionResult> Create()
+        public async Task<IActionResult> Create(int? patientId, string? reason)
         {
             // Check if user is logged in
             if (HttpContext.Session.GetString("UserId") == null)
@@ -64,71 +64,74 @@ namespace INF_SP.Controllers
                 .ToListAsync();
 
             ViewBag.Patients = patientList;
+            // Pass pre-fill values to the view
+            ViewBag.PrefilledPatientId = patientId;
+            ViewBag.PrefilledReason = reason;
             return View();
         }
 
         [HttpPost]
-[ValidateAntiForgeryToken]
-public async Task<IActionResult> Create(MedicalRecord record, Prescription Prescription)
-{
-    // Check if user is logged in
-    if (HttpContext.Session.GetString("UserId") == null)
-    {
-        return RedirectToAction("Login", "Account");
-    }
-
-    // Check if user is a doctor
-    var role = HttpContext.Session.GetString("Role");
-    if (role != "Doctor")
-    {
-        return RedirectToAction("Index", "Home");
-    }
-
-    record.DoctorId = int.Parse(HttpContext.Session.GetString("UserId")!);
-    record.RecordDate = DateTime.Now;
-
-    // Remove prescription validation errors if no medication name provided
-    if (string.IsNullOrWhiteSpace(Prescription.MedicationName))
-    {
-        ModelState.Remove("Prescription.MedicationName");
-        ModelState.Remove("Prescription.Dosage");
-        ModelState.Remove("Prescription.Instructions");
-    }
-
-    if (!ModelState.IsValid)
-    {
-        // Reload all patients
-        var patientList = await _context.Users
-            .Where(u => u.Role == "Patient")
-            .OrderBy(u => u.FullName)
-            .Select(u => new SelectListItem
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(MedicalRecord record, Prescription Prescription)
+        {
+            // Check if user is logged in
+            if (HttpContext.Session.GetString("UserId") == null)
             {
-                Value = u.UserID.ToString(),
-                Text = u.FullName
-            })
-            .ToListAsync();
+                return RedirectToAction("Login", "Account");
+            }
 
-        ViewBag.Patients = patientList;
-        return View(record);
-    }
+            // Check if user is a doctor
+            var role = HttpContext.Session.GetString("Role");
+            if (role != "Doctor")
+            {
+                return RedirectToAction("Index", "Home");
+            }
 
-    // Save medical record first
-    _context.MedicalRecords.Add(record);
-    await _context.SaveChangesAsync();
+            record.DoctorId = int.Parse(HttpContext.Session.GetString("UserId")!);
+            record.RecordDate = DateTime.Now;
 
-    // Save prescription if medication name is provided
-    if (!string.IsNullOrWhiteSpace(Prescription.MedicationName))
-    {
-        Prescription.RecordId = record.RecordId;
-        Prescription.PatientID = record.PatientId;
-        Prescription.CreatedDate = DateTime.Now;
-        
-        _context.Prescriptions.Add(Prescription);
-        await _context.SaveChangesAsync();
-    }
+            // Remove prescription validation errors if no medication name provided
+            if (string.IsNullOrWhiteSpace(Prescription.MedicationName))
+            {
+                ModelState.Remove("Prescription.MedicationName");
+                ModelState.Remove("Prescription.Dosage");
+                ModelState.Remove("Prescription.Instructions");
+            }
 
-    TempData["Success"] = "Medical record created successfully!";
-    return RedirectToAction("DoctorAppointments", "Appointment");
-}
+            if (!ModelState.IsValid)
+            {
+                // Reload all patients
+                var patientList = await _context.Users
+                    .Where(u => u.Role == "Patient")
+                    .OrderBy(u => u.FullName)
+                    .Select(u => new SelectListItem
+                    {
+                        Value = u.UserID.ToString(),
+                        Text = u.FullName
+                    })
+                    .ToListAsync();
+
+                ViewBag.Patients = patientList;
+                return View(record);
+            }
+
+            // Save medical record first
+            _context.MedicalRecords.Add(record);
+            await _context.SaveChangesAsync();
+
+            // Save prescription if medication name is provided
+            if (!string.IsNullOrWhiteSpace(Prescription.MedicationName))
+            {
+                Prescription.RecordId = record.RecordId;
+                Prescription.PatientID = record.PatientId;
+                Prescription.CreatedDate = DateTime.Now;
+                
+                _context.Prescriptions.Add(Prescription);
+                await _context.SaveChangesAsync();
+            }
+
+            TempData["Success"] = "Medical record created successfully!";
+            return RedirectToAction("DoctorAppointments", "Appointment");
+        }
     }
 }
