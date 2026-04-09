@@ -25,28 +25,36 @@
     <form asp-action="Create" method="post">
         @Html.AntiForgeryToken()
         
+        @if (ViewBag.AppointmentId != null)
+        {
+            <input type="hidden" name="AppointmentId" value="@ViewBag.AppointmentId" />
+        }
+        
         <div class="form-group mb-3">
             <label>Select Patient *</label>
-            <select name="PatientId" class="form-control" required>
-                <option value="">-- Select Patient --</option>
-                @foreach (var patient in (ViewBag.Patients as List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)!)
-                {
-                    if (ViewBag.PrefilledPatientId != null && patient.Value == ViewBag.PrefilledPatientId.ToString())
-                    {
-                        <option value="@patient.Value" selected>@patient.Text</option>
-                    }
-                    else
+            @if (ViewBag.IsFromAppointment == true && ViewBag.PreSelectedPatient != null)
+            {
+                <!-- Read-only display when from appointment -->
+                <input type="text" class="form-control" value="@ViewBag.PreSelectedPatient.FullName" readonly style="background-color: #e9ecef;">
+                <input type="hidden" name="PatientId" value="@ViewBag.PreSelectedPatient.UserID">
+            }
+            else
+            {
+                <!-- Dropdown when creating record directly -->
+                <select name="PatientId" class="form-control" required>
+                    <option value="">-- Select Patient --</option>
+                    @foreach (var patient in (ViewBag.Patients as List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)!)
                     {
                         <option value="@patient.Value">@patient.Text</option>
                     }
-                }
-            </select>
+                </select>
+            }
         </div>
 
         <div class="form-group mb-3">
             <label>Reason for Visit *</label>
             <input name="ReasonForVisit" class="form-control" placeholder="E.g., Annual checkup" 
-                   value="@ViewBag.PrefilledReason" required />
+                   value="@ViewBag.PreFilledReason" required />
         </div>
 
         <div class="form-group mb-3">

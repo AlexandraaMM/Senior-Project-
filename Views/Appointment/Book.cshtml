@@ -37,7 +37,7 @@
                 <option value="">-- Select Doctor --</option>
                 @foreach (var doctor in ViewBag.Doctors)
                 {
-                    <option value="@doctor.UserID">@doctor.FullName</option>
+                    <option value="@doctor.UserID" selected="@(ViewBag.SelectedDoctorId == doctor.UserID ? "selected" : null)">@doctor.FullName</option>
                 }
             </select>
         </div>
@@ -48,7 +48,7 @@
                     <label>Appointment Date *</label>
                     <input type="date" name="AppointmentDate" class="form-control" 
                            min="@DateTime.Now.ToString("yyyy-MM-dd")" 
-                           value="@DateTime.Now.ToString("yyyy-MM-dd")" required />
+                           value="@(ViewBag.SelectedDate ?? DateTime.Now.ToString("yyyy-MM-dd"))" required />
                     <small class="text-muted">Please select a future date</small>
                 </div>
             </div>
@@ -57,23 +57,23 @@
                     <label>Appointment Time *</label>
                     <select name="AppointmentTime" class="form-control" required>
                         <option value="">-- Select Time --</option>
-                        <option value="09:00">9:00 AM</option>
-                        <option value="09:30">9:30 AM</option>
-                        <option value="10:00">10:00 AM</option>
-                        <option value="10:30">10:30 AM</option>
-                        <option value="11:00">11:00 AM</option>
-                        <option value="11:30">11:30 AM</option>
-                        <option value="12:00">12:00 PM</option>
-                        <option value="12:30">12:30 PM</option>
-                        <option value="13:00">1:00 PM</option>
-                        <option value="13:30">1:30 PM</option>
-                        <option value="14:00">2:00 PM</option>
-                        <option value="14:30">2:30 PM</option>
-                        <option value="15:00">3:00 PM</option>
-                        <option value="15:30">3:30 PM</option>
-                        <option value="16:00">4:00 PM</option>
-                        <option value="16:30">4:30 PM</option>
-                        <option value="17:00">5:00 PM</option>
+                        <option value="09:00" selected="@(ViewBag.SelectedTime == "09:00" ? "selected" : null)">9:00 AM</option>
+                        <option value="09:30" selected="@(ViewBag.SelectedTime == "09:30" ? "selected" : null)">9:30 AM</option>
+                        <option value="10:00" selected="@(ViewBag.SelectedTime == "10:00" ? "selected" : null)">10:00 AM</option>
+                        <option value="10:30" selected="@(ViewBag.SelectedTime == "10:30" ? "selected" : null)">10:30 AM</option>
+                        <option value="11:00" selected="@(ViewBag.SelectedTime == "11:00" ? "selected" : null)">11:00 AM</option>
+                        <option value="11:30" selected="@(ViewBag.SelectedTime == "11:30" ? "selected" : null)">11:30 AM</option>
+                        <option value="12:00" selected="@(ViewBag.SelectedTime == "12:00" ? "selected" : null)">12:00 PM</option>
+                        <option value="12:30" selected="@(ViewBag.SelectedTime == "12:30" ? "selected" : null)">12:30 PM</option>
+                        <option value="13:00" selected="@(ViewBag.SelectedTime == "13:00" ? "selected" : null)">1:00 PM</option>
+                        <option value="13:30" selected="@(ViewBag.SelectedTime == "13:30" ? "selected" : null)">1:30 PM</option>
+                        <option value="14:00" selected="@(ViewBag.SelectedTime == "14:00" ? "selected" : null)">2:00 PM</option>
+                        <option value="14:30" selected="@(ViewBag.SelectedTime == "14:30" ? "selected" : null)">2:30 PM</option>
+                        <option value="15:00" selected="@(ViewBag.SelectedTime == "15:00" ? "selected" : null)">3:00 PM</option>
+                        <option value="15:30" selected="@(ViewBag.SelectedTime == "15:30" ? "selected" : null)">3:30 PM</option>
+                        <option value="16:00" selected="@(ViewBag.SelectedTime == "16:00" ? "selected" : null)">4:00 PM</option>
+                        <option value="16:30" selected="@(ViewBag.SelectedTime == "16:30" ? "selected" : null)">4:30 PM</option>
+                        <option value="17:00" selected="@(ViewBag.SelectedTime == "17:00" ? "selected" : null)">5:00 PM</option>
                     </select>
                     <small class="text-muted">Doctor hours: 9:00 AM - 5:00 PM</small>
                 </div>
@@ -82,7 +82,7 @@
 
         <div class="form-group mb-3">
             <label>Reason for Visit *</label>
-            <textarea name="Reason" class="form-control" rows="3" placeholder="Describe your symptoms or reason for visit" required></textarea>
+            <textarea name="Reason" class="form-control" rows="3" placeholder="Describe your symptoms or reason for visit" required>@ViewBag.EnteredReason</textarea>
         </div>
 
         <div class="form-group">

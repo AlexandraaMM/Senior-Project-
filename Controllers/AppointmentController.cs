@@ -73,9 +73,7 @@ namespace INF_SP.Controllers
                 var appointmentRecordMap = new Dictionary<int, int>();
                 foreach (var appointment in appointments.Where(a => a.Status == "Completed"))
                 {
-                    var record = medicalRecords.FirstOrDefault(r => 
-                        r.PatientId == appointment.PatientId &&
-                        r.RecordDate.Date == appointment.AppointmentDate.Date);
+                    var record = medicalRecords.FirstOrDefault(r => r.AppointmentId == appointment.AppointmentId);
                     
                     if (record != null)
                     {
@@ -144,11 +142,20 @@ namespace INF_SP.Controllers
                     return RedirectToAction("Login", "Account");
                 }
 
+                // Get doctors list
+                var doctors = await _context.Users.Where(u => u.Role == "Doctor").ToListAsync();
+                ViewBag.Doctors = doctors;
+
+                // Preserve form values for when validation fails
+                ViewBag.SelectedDoctorId = DoctorId;
+                ViewBag.SelectedDate = AppointmentDate;
+                ViewBag.SelectedTime = AppointmentTime;
+                ViewBag.EnteredReason = Reason;
+
                 // Validate doctor selection
                 if (DoctorId <= 0)
                 {
                     ViewBag.ErrorMessage = "Please select a doctor";
-                    ViewBag.Doctors = await _context.Users.Where(u => u.Role == "Doctor").ToListAsync();
                     return View();
                 }
 
@@ -165,7 +172,6 @@ namespace INF_SP.Controllers
                 catch
                 {
                     ViewBag.ErrorMessage = "Invalid date or time format";
-                    ViewBag.Doctors = await _context.Users.Where(u => u.Role == "Doctor").ToListAsync();
                     return View();
                 }
 
@@ -173,7 +179,6 @@ namespace INF_SP.Controllers
                 if (appointmentDateTime < DateTime.Now)
                 {
                     ViewBag.ErrorMessage = "Cannot book appointments for past dates. Please select a future date and time.";
-                    ViewBag.Doctors = await _context.Users.Where(u => u.Role == "Doctor").ToListAsync();
                     return View();
                 }
 
@@ -222,14 +227,11 @@ namespace INF_SP.Controllers
                 TempData["Error"] = "Appointment not found";
                 return RedirectToAction("DoctorAppointments");
             }
-
-            // Mark appointment as completed
-            appointment.Status = "Completed";
-            await _context.SaveChangesAsync();
-
+            
             return RedirectToAction("Create", "MedicalRecord", new { 
                 patientId = appointment.PatientId, 
-                reason = appointment.Reason 
+                reason = appointment.Reason,
+                appointmentId = id  
             });
         }
 

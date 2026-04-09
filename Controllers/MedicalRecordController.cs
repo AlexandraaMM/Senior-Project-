@@ -37,7 +37,7 @@ namespace INF_SP.Controllers
             return View(records);
         }
 
-        public async Task<IActionResult> Create(int? patientId, string? reason)
+        public async Task<IActionResult> Create(int? patientId, string? reason, int? appointmentId)
         {
             // Check if user is logged in
             if (HttpContext.Session.GetString("UserId") == null)
@@ -64,9 +64,20 @@ namespace INF_SP.Controllers
                 .ToListAsync();
 
             ViewBag.Patients = patientList;
-            // Pass pre-fill values to the view
-            ViewBag.PrefilledPatientId = patientId;
-            ViewBag.PrefilledReason = reason;
+
+            if (patientId.HasValue)
+            {
+                var patient = await _context.Users.FindAsync(patientId.Value);
+                ViewBag.PreSelectedPatient = patient;
+                ViewBag.PreFilledReason = reason;
+                ViewBag.IsFromAppointment = true;
+                ViewBag.AppointmentId = appointmentId;
+            }
+            else
+            {
+                ViewBag.IsFromAppointment = false;
+            }
+
             return View();
         }
 
@@ -90,7 +101,6 @@ namespace INF_SP.Controllers
             record.DoctorId = int.Parse(HttpContext.Session.GetString("UserId")!);
             record.RecordDate = DateTime.Now;
 
-            // Remove prescription validation errors if no medication name provided
             if (string.IsNullOrWhiteSpace(Prescription.MedicationName))
             {
                 ModelState.Remove("Prescription.MedicationName");
@@ -118,6 +128,23 @@ namespace INF_SP.Controllers
             // Save medical record first
             _context.MedicalRecords.Add(record);
             await _context.SaveChangesAsync();
+
+            if (Request.Form.ContainsKey("AppointmentId") && !string.IsNullOrEmpty(Request.Form["AppointmentId"]))
+{
+                var appointmentId = int.Parse(Request.Form["AppointmentId"]!);
+                
+                // Link the medical record to the appointment
+                record.AppointmentId = appointmentId;
+                await _context.SaveChangesAsync();
+                
+                // Mark appointment as completed
+                var appointment = await _context.Appointments.FindAsync(appointmentId);
+                if (appointment != null)
+                {
+                    appointment.Status = "Completed";
+                    await _context.SaveChangesAsync();
+                }
+            }
 
             // Save prescription if medication name is provided
             if (!string.IsNullOrWhiteSpace(Prescription.MedicationName))

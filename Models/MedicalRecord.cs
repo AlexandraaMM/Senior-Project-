@@ -14,7 +14,9 @@ namespace PracticeFlow.Models
         
         [Required]
         public int DoctorId { get; set; }  // Identifies which doctor conducted the visit
-        
+
+        public int? AppointmentId { get; set; }  // Links to appointment if created from Record Visit (nullable for direct creation)
+    
         [Required]
         public DateTime RecordDate { get; set; } = DateTime.Now;  
         

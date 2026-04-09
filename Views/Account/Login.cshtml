@@ -39,3 +39,15 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        // Prevent accessing login page when already logged in
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted || (window.performance && window.performance.navigation.type === 2)) {
+                // Force a fresh page load to trigger server-side redirect
+                window.location.reload();
+            }
+        });
+    </script>
+}

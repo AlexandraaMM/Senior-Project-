@@ -48,18 +48,17 @@ namespace INF_SP.Controllers
         public IActionResult AdminDashboard()
         {
             
+            {
+            var userId = HttpContext.Session.GetString("UserId");
             var role = HttpContext.Session.GetString("Role");
-            if (role != "Admin")
+            
+            if (string.IsNullOrEmpty(userId) || role != "Admin")
             {
                 return RedirectToAction("Login", "Account");
             }
 
-           
-            ViewBag.Username = HttpContext.Session.GetString("Username");
-            ViewBag.FullName = HttpContext.Session.GetString("FullName");
-            ViewBag.Role = role;
-            
-            return View();
+            return RedirectToAction("ViewUsers", "Admin");
+            }
         }
 
                public IActionResult DoctorDashboard()

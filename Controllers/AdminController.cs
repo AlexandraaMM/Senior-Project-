@@ -209,10 +209,86 @@ namespace INF_SP.Controllers
                 return RedirectToAction("ViewUsers");
             }
 
+            // 1. Delete prescriptions for this user
+            var prescriptions = await _context.Prescriptions
+                .Where(p => p.PatientID == id)
+                .ToListAsync();
+            _context.Prescriptions.RemoveRange(prescriptions);
+
+            // 2. Delete vitals logs
+            var vitals = await _context.VitalsLogs
+                .Where(v => v.PatientID == id)
+                .ToListAsync();
+            _context.VitalsLogs.RemoveRange(vitals);
+
+            var medicalRecords = await _context.MedicalRecords
+                .Where(m => m.PatientId == id || m.DoctorId == id)
+                .ToListAsync();
+            _context.MedicalRecords.RemoveRange(medicalRecords);
+
+            var appointments = await _context.Appointments
+                .Where(a => a.PatientId == id || a.DoctorId == id)
+                .ToListAsync();
+            _context.Appointments.RemoveRange(appointments);
+
+            // 5. Finally delete the user
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
 
             TempData["Success"] = $"User '{user.Username}' deleted successfully!";
+            return RedirectToAction("ViewUsers");
+        }
+        [HttpGet]
+        public async Task<IActionResult> ChangePassword(int id)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            ViewBag.UserId = user.UserID;
+            ViewBag.Username = user.Username;
+            ViewBag.FullName = user.FullName;
+            
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePassword(int UserId, string NewPassword, string ConfirmPassword)
+        {
+            if (string.IsNullOrEmpty(NewPassword) || NewPassword.Length < 6)
+            {
+                ViewBag.Error = "Password must be at least 6 characters long";
+                var user = await _context.Users.FindAsync(UserId);
+                ViewBag.UserId = user!.UserID;
+                ViewBag.Username = user.Username;
+                ViewBag.FullName = user.FullName;
+                return View();
+            }
+
+            if (NewPassword != ConfirmPassword)
+            {
+                ViewBag.Error = "Passwords do not match";
+                var user = await _context.Users.FindAsync(UserId);
+                ViewBag.UserId = user!.UserID;
+                ViewBag.Username = user.Username;
+                ViewBag.FullName = user.FullName;
+                return View();
+            }
+
+            var userToUpdate = await _context.Users.FindAsync(UserId);
+            if (userToUpdate == null)
+            {
+                return NotFound();
+            }
+
+            userToUpdate.PasswordHash = BCrypt.Net.BCrypt.HashPassword(NewPassword);
+            
+            await _context.SaveChangesAsync();
+            
+            TempData["Success"] = $"Password changed successfully for {userToUpdate.Username}";
             return RedirectToAction("ViewUsers");
         }
 
