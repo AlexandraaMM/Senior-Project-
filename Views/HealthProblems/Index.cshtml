@@ -1,0 +1,74 @@
+@model IEnumerable<PracticeFlow.Models.HealthProblem>
+@{
+    ViewData["Title"] = "Health Problems";
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Health Problems — @ViewBag.PatientName</h2>
+    <div>
+        <a asp-action="Create" asp-route-patientId="@ViewBag.PatientId"
+           class="btn" style="background-color: #f59e0b; border-color: #f59e0b; color: white;">
+            + Add Health Problem
+        </a>
+        <a asp-controller="DoctorPatient" asp-action="ViewPatients"
+           class="btn btn-secondary">Back to Patients</a>
+    </div>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">No health problems recorded for this patient.</div>
+}
+else
+{
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Problem</th>
+                <th>Diagnosed</th>
+                <th>Status</th>
+                <th>Resolved</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var problem in Model)
+            {
+                <tr>
+                    <td>@problem.ProblemDescription</td>
+                    <td>@problem.DiagnosedDate.ToString("MMM dd, yyyy")</td>
+                    <td>
+                        @if (problem.Status == "Active")
+                        {
+                            <span class="badge bg-warning text-dark">Active</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success">Resolved</span>
+                        }
+                    </td>
+                    <td>@(problem.ResolvedDate?.ToString("MMM dd, yyyy") ?? "—")</td>
+                    <td>
+                        <a asp-controller="TreatmentGoals" asp-action="Index"
+                           asp-route-problemId="@problem.ProblemID"
+                           class="btn btn-sm"
+                           style="background-color: #06b6d4; border-color: #06b6d4; color: white;">
+                            View Goals
+                        </a>
+                        @if (problem.Status == "Active")
+                        {
+                            <a asp-action="Resolve" asp-route-id="@problem.ProblemID"
+                               class="btn btn-sm btn-secondary">
+                                Mark Resolved
+                            </a>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

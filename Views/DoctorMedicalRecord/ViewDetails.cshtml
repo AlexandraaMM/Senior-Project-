@@ -34,10 +34,7 @@
                 <div class="col-md-3"><strong>Treatment:</strong></div>
                 <div class="col-md-9">@Model.Treatment</div>
             </div>
-            <div class="row mb-3">
-                <div class="col-md-3"><strong>Prescription:</strong></div>
-                <div class="col-md-9">@Model.Prescription</div>
-            </div>
+           
             <div class="row mb-3">
                 <div class="col-md-3"><strong>Notes:</strong></div>
                 <div class="col-md-9">@Model.Notes</div>
@@ -120,7 +117,10 @@
     }
 
     <div class="mt-3">
-        <a asp-action="AddPrescription" asp-route-id="@Model.RecordId" class="btn btn-success">Add Prescription</a>
+        <a asp-action="AddPrescription" asp-route-id="@Model.RecordId" 
+           class="btn" style="background-color: #10b981; border-color: #10b981; color: white;">
+            Add Prescription
+        </a>
         <a asp-action="ViewRecords" class="btn btn-secondary">Back to Records</a>
     </div>
 </div>

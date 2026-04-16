@@ -1,0 +1,53 @@
+@model PracticeFlow.Models.TreatmentGoal
+@{
+    ViewData["Title"] = "Add Treatment Goal";
+}
+<div class="container mt-4">
+    <h2>Add Treatment Goal</h2>
+    <p class="text-muted">Problem: @ViewBag.ProblemDescription — @ViewBag.PatientName</p>
+    <hr />
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger">
+            <strong>Please fix the following errors:</strong>
+            <ul>
+                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <li>@error.ErrorMessage</li>
+                }
+            </ul>
+        </div>
+    }
+
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="ProblemID" value="@ViewBag.ProblemId" />
+
+        <div class="form-group mb-3">
+            <label>Goal Description *</label>
+            <textarea name="GoalDescription" class="form-control" rows="3"
+                      placeholder="e.g., Reduce HbA1c below 7% by December" required></textarea>
+        </div>
+
+        <div class="form-group mb-3">
+            <label>Initial Progress (%)</label>
+            <input type="number" name="ProgressPercent" class="form-control"
+                   min="0" max="100" value="0" />
+        </div>
+
+        <div class="form-group mb-3">
+            <label>Target Date (Optional)</label>
+            <input type="date" name="TargetDate" class="form-control" />
+        </div>
+
+        <div class="form-group">
+            <button type="submit" class="btn"
+                    style="background-color: #f59e0b; border-color: #f59e0b; color: white;">
+                Save Goal
+            </button>
+            <a asp-action="Index" asp-route-problemId="@ViewBag.ProblemId"
+               class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>

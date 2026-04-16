@@ -76,6 +76,38 @@ namespace INF_SP.Controllers
             return View(record);
         }
 
+        // View patient's complete medical history
+        public async Task<IActionResult> PatientHistory(int patientId)
+        {
+            // Check if user is logged in and is a doctor
+            var userId = HttpContext.Session.GetString("UserId");
+            var role = HttpContext.Session.GetString("Role");
+            
+            if (string.IsNullOrEmpty(userId) || role != "Doctor")
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var patient = await _context.Users.FindAsync(patientId);
+            if (patient == null)
+            {
+                return NotFound();
+            }
+
+            // Get all medical records for this patient
+            var records = await _context.MedicalRecords
+                .Include(r => r.Doctor)
+                .Include(r => r.Prescriptions)
+                .Where(r => r.PatientId == patientId)
+                .OrderByDescending(r => r.RecordDate)
+                .ToListAsync();
+
+            ViewBag.PatientName = patient.FullName;
+            ViewBag.PatientId = patientId;
+
+            return View(records);
+        }
+
         // Add prescription to medical record
         public async Task<IActionResult> AddPrescription(int id)
         {

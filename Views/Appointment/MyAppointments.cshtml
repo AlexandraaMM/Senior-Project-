@@ -7,12 +7,14 @@
 <h2>My Appointments</h2>
 
 <div class="mb-4">
-    <a href="/Appointment/Book" class="btn btn-success me-2">Book New Appointment</a>
+    <a asp-action="Book" class="btn" style="background-color: #667eea; border-color: #667eea; color: white;">
+        Book New Appointment
+    </a>
     <a asp-controller="Home" asp-action="PatientDashboard" class="btn btn-secondary">Back to Dashboard</a>
 </div>
 
-<table class="table">
-    <thead>
+<table class="table table-striped table-hover">
+    <thead class="table-dark">
         <tr>
             <th>Doctor</th>
             <th>Date & Time</th>
@@ -27,7 +29,24 @@
                 <td>@(appointment.Doctor?.FullName ?? "N/A")</td>
                 <td>@appointment.AppointmentDate.ToString("yyyy-MM-dd HH:mm")</td>
                 <td>@appointment.Reason</td>
-                <td>@appointment.Status</td>
+                <td>
+                    @if (appointment.Status == "Completed")
+                    {
+                        <span class="badge bg-success">Completed</span>
+                    }
+                    else if (appointment.Status == "Cancelled")
+                    {
+                        <span class="badge bg-danger">Cancelled</span>
+                    }
+                    else if (appointment.Status == "Past Due")
+                    {
+                        <span class="badge bg-warning text-dark">Past Due</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-primary">Scheduled</span>
+                    }
+                </td>
             </tr>
         }
     </tbody>

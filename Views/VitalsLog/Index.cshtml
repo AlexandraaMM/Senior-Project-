@@ -1,0 +1,58 @@
+@model IEnumerable<PracticeFlow.Models.VitalsLog>
+
+@{
+    ViewData["Title"] = "Patient Vitals";
+}
+
+<div class="container mt-4">
+    <h2>Vitals History - @ViewBag.PatientName</h2>
+    <hr />
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    <div class="mb-3">
+        <a asp-action="Create" asp-route-patientId="@ViewBag.PatientId" class="btn" style="background-color: #10b981; border-color: #10b981; color: white;">Log New Vitals</a>
+        <a asp-controller="DoctorPatient" asp-action="ViewPatients" class="btn btn-secondary">Back to Patients</a>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">No vitals recorded yet for this patient.</div>
+    }
+    else
+    {
+        <table class="table table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>Date</th>
+                    <th>Weight (kg)</th>
+                    <th>Height (cm)</th>
+                    <th>BMI</th>
+                    <th>Category</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var vital in Model)
+                {
+                    <tr>
+                        <td>@vital.RecordedDate.ToString("MMM dd, yyyy HH:mm")</td>
+                        <td>@vital.Weight_kg</td>
+                        <td>@vital.Height_cm</td>
+                        <td>@(vital.BMI.HasValue ? vital.BMI.Value.ToString("F1") : "N/A")</td>                       
+                        <td>
+                            @{
+                                var category = vital.BMICategory;
+                                var badgeColor = category == "Normal" ? "success" :
+                                                category == "Obese" ? "danger" : "warning";
+                            }
+                            <span class="badge bg-@badgeColor">@category</span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>

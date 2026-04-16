@@ -15,7 +15,6 @@ namespace INF_SP.Controllers
             _context = context;
         }
 
-        // This is the main page and it redirects to the right dashboard
         public IActionResult Index()
         {
             // Check if user is logged in
@@ -30,7 +29,6 @@ namespace INF_SP.Controllers
             
             var role = HttpContext.Session.GetString("Role");
             
-            // Send them to their specific dashboard
             switch (role)
             {
                 case "Admin":
@@ -43,7 +41,6 @@ namespace INF_SP.Controllers
                     return View();
             }
         }
-
         
         public IActionResult AdminDashboard()
         {
@@ -61,7 +58,7 @@ namespace INF_SP.Controllers
             }
         }
 
-               public IActionResult DoctorDashboard()
+        public IActionResult DoctorDashboard()
         {
             
             var role = HttpContext.Session.GetString("Role");
@@ -79,21 +76,37 @@ namespace INF_SP.Controllers
         }
 
         
-                public async Task<IActionResult> PatientDashboard()
+        public async Task<IActionResult> PatientDashboard()
+       
         {
+            var userId = HttpContext.Session.GetString("UserId");
             var role = HttpContext.Session.GetString("Role");
-            if (role != "Patient")
+            
+            if (string.IsNullOrEmpty(userId) || role != "Patient")
             {
                 return RedirectToAction("Login", "Account");
             }
 
-    // Get the patient's data from database
-    var userId = int.Parse(HttpContext.Session.GetString("UserId")!);
-    var patient = await _context.Users.FindAsync(userId);
-    
-    // Pass the model to the view
-    return View(patient);
-}
+            var patientId = int.Parse(userId);
+
+            ViewBag.UpcomingCount = await _context.Appointments
+                .Where(a => a.PatientId == patientId && 
+                            a.AppointmentDate >= DateTime.Now &&
+                            a.Status == "Scheduled")
+                .CountAsync();
+
+            ViewBag.RecordsCount = await _context.MedicalRecords
+                .Where(r => r.PatientId == patientId)
+                .CountAsync();
+
+            ViewBag.PrescriptionsCount = await _context.Prescriptions
+                .Where(p => p.PatientID == patientId)
+                .CountAsync();
+
+            ViewBag.FullName = HttpContext.Session.GetString("FullName");
+
+            return View();
+        }
 
         public IActionResult Privacy()
         {

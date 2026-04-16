@@ -1,0 +1,62 @@
+@model IEnumerable<PracticeFlow.Models.TreatmentGoal>
+@{
+    ViewData["Title"] = "Treatment Goals";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h2>Treatment Goals</h2>
+        <p class="text-muted mb-0">
+            Problem: @ViewBag.ProblemDescription —
+            @if (ViewBag.ProblemStatus == "Active")
+            {
+                <span class="badge bg-warning text-dark">Active</span>
+            }
+            else
+            {
+                <span class="badge bg-success">Resolved</span>
+            }
+        </p>
+    </div>
+    <a asp-action="MyHealthProblems" class="btn btn-secondary">
+        Back to My Problems
+    </a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        No treatment goals have been set for this problem yet.
+    </div>
+}
+else
+{
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Goal</th>
+                <th>Set Date</th>
+                <th>Target Date</th>
+                <th>Progress</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var goal in Model)
+            {
+                <tr>
+                    <td>@goal.GoalDescription</td>
+                    <td>@goal.SetDate.ToString("MMM dd, yyyy")</td>
+                    <td>@(goal.TargetDate?.ToString("MMM dd, yyyy") ?? "No target set")</td>
+                    <td style="width: 200px;">
+                        <div class="progress" style="height: 20px;">
+                            <div class="progress-bar bg-success" role="progressbar"
+                                 style="width: @goal.ProgressPercent%">
+                                @goal.ProgressPercent%
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

@@ -1,0 +1,73 @@
+@model IEnumerable<PracticeFlow.Models.VitalsLog>
+
+@{
+    ViewData["Title"] = "My Vitals History";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>My Vitals History</h2>
+    <a asp-controller="Home" asp-action="PatientDashboard" class="btn btn-secondary">Back to Dashboard</a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">No vitals recorded yet. Your doctor will log your vitals during appointments.</div>
+}
+else
+{
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Date</th>
+                <th>Weight (kg)</th>
+                <th>Height (cm)</th>
+                <th>BMI</th>
+                <th>Category</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var vital in Model)
+            {
+                <tr>
+                    <td>@vital.RecordedDate.ToString("MMM dd, yyyy HH:mm")</td>
+                    <td>@vital.Weight_kg kg</td>
+                    <td>@vital.Height_cm cm</td>
+                    <td>
+                        @{
+                            if (vital.Height_cm > 0 && vital.Weight_kg > 0)
+                            {
+                                double heightInMeters = (double)vital.Height_cm / 100.0;
+                                double bmi = (double)vital.Weight_kg / (heightInMeters * heightInMeters);
+                                <text>@bmi.ToString("F1")</text>
+                            }
+                            else
+                            {
+                                <text>N/A</text>
+                            }
+                        }
+                    </td>
+                    <td>
+                        @{
+                            if (vital.Height_cm > 0 && vital.Weight_kg > 0)
+                            {
+                                double heightInMeters = (double)vital.Height_cm / 100.0;
+                                double bmi = (double)vital.Weight_kg / (heightInMeters * heightInMeters);
+                                string category = bmi < 18.5 ? "Underweight" :
+                                                bmi < 25 ? "Normal" :
+                                                bmi < 30 ? "Overweight" : "Obese";
+                                string badgeColor = bmi < 18.5 ? "warning" :
+                                                   bmi < 25 ? "success" :
+                                                   bmi < 30 ? "warning" : "danger";
+                                <span class="badge bg-@badgeColor">@category</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">N/A</span>
+                            }
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

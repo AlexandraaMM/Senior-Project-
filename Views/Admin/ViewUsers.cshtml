@@ -81,15 +81,24 @@
                             }
                         </td>
                         <td>
-                            <a asp-action="EditUser" asp-route-id="@user.UserID" class="btn btn-sm btn-warning">Edit</a>
-                            <a asp-action="ChangePassword" asp-route-id="@user.UserID" class="btn btn-sm btn-info">Change Password</a>
-                            <form asp-action="DeleteUser" method="post" style="display:inline;">
-                                <input type="hidden" name="id" value="@user.UserID" />
-                                <button type="submit" class="btn btn-sm btn-danger" 
-                                        onclick="return confirm('Are you sure you want to delete @user.Username?');">
-                                    Delete
-                                </button>
-                            </form>
+                            @{
+                                var currentUserId = Context.Session.GetString("UserId");
+                                var isCurrentUser = (user.UserID.ToString() == currentUserId);
+                            }
+                            
+                            @if (!isCurrentUser)
+                            {
+                                <a asp-action="EditUser" asp-route-id="@user.UserID" class="btn btn-sm btn-warning">Edit</a>
+                                <a asp-action="ChangePassword" asp-route-id="@user.UserID" class="btn btn-sm btn-info">Change Password</a>
+                                <form asp-action="DeleteUser" method="post" style="display:inline;">
+                                    <input type="hidden" name="id" value="@user.UserID" />
+                                    <button type="submit" class="btn btn-sm btn-danger" 
+                                            onclick="return confirm('Are you sure you want to delete @user.Username?');">
+                                        Delete
+                                    </button>
+                                </form>
+                            }
+                            
                         </td>
                     </tr>
                 }

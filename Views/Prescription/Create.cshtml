@@ -1,0 +1,78 @@
+@model PracticeFlow.Models.Prescription
+
+@{
+    ViewData["Title"] = "Add Prescription";
+}
+
+<div class="container mt-4">
+    <h2>Add Prescription</h2>
+    <hr />
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5>Medical Record Information</h5>
+            <p><strong>Patient:</strong> @ViewBag.PatientName</p>
+            <p><strong>Date:</strong> @ViewBag.RecordDate</p>
+            <p><strong>Reason for Visit:</strong> @ViewBag.ReasonForVisit</p>
+        </div>
+    </div>
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger">
+            <strong>Please fix the following errors:</strong>
+            <ul>
+                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <li>@error.ErrorMessage</li>
+                }
+            </ul>
+        </div>
+    }
+
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+        
+        <input type="hidden" name="RecordId" value="@ViewBag.RecordId" />
+        <input type="hidden" name="PatientID" value="@Model?.PatientID" />
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label>Medication Name *</label>
+                <input type="text" name="MedicationName" class="form-control" 
+                       placeholder="e.g., Ibuprofen" value="@Model?.MedicationName" required />
+            </div>
+            <div class="col-md-6 mb-3">
+                <label>Dosage *</label>
+                <input type="text" name="Dosage" class="form-control" 
+                       placeholder="e.g., 200mg" value="@Model?.Dosage" required />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label>Start Date *</label>
+                <input type="date" name="StartDate" class="form-control" 
+                       value="@(Model?.StartDate.ToString("yyyy-MM-dd") ?? DateTime.Now.ToString("yyyy-MM-dd"))" required />
+            </div>
+            <div class="col-md-6 mb-3">
+                <label>End Date (Optional)</label>
+                <input type="date" name="EndDate" class="form-control" 
+                       value="@Model?.EndDate?.ToString("yyyy-MM-dd")" />
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label>Instructions *</label>
+            <textarea name="Instructions" class="form-control" rows="3" 
+                      placeholder="e.g., Take twice daily with food" required>@Model?.Instructions</textarea>
+        </div>
+
+        <div class="form-group">
+            <button type="submit" class="btn" style="background-color: #10b981; border-color: #10b981; color: white;">
+                Add Prescription
+            </button>
+            <a asp-controller="DoctorMedicalRecord" asp-action="ViewRecords" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>

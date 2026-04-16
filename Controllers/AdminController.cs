@@ -104,6 +104,12 @@ namespace INF_SP.Controllers
             {
                 return RedirectToAction("Login", "Account");
             }
+            
+            if (id.ToString() == userId)
+            {
+                TempData["Error"] = "You cannot edit your own account! Use Settings to update your information.";
+                return RedirectToAction("ViewUsers");
+            }
 
             var user = await _context.Users.FindAsync(id);
             
@@ -127,6 +133,12 @@ namespace INF_SP.Controllers
             if (string.IsNullOrEmpty(userId) || role != "Admin")
             {
                 return RedirectToAction("Login", "Account");
+            }
+
+            if (id.ToString() == userId)
+            {
+                TempData["Error"] = "You cannot edit your own account! Use Settings to update your information.";
+                return RedirectToAction("ViewUsers");
             }
 
             if (id != user.UserID)
@@ -241,6 +253,14 @@ namespace INF_SP.Controllers
         [HttpGet]
         public async Task<IActionResult> ChangePassword(int id)
         {
+            var userId = HttpContext.Session.GetString("UserId");
+            
+            if (id.ToString() == userId)
+            {
+                TempData["Error"] = "You cannot change your own password here! Use Settings to change your password.";
+                return RedirectToAction("ViewUsers");
+            }
+
             var user = await _context.Users.FindAsync(id);
             if (user == null)
             {
@@ -258,6 +278,14 @@ namespace INF_SP.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ChangePassword(int UserId, string NewPassword, string ConfirmPassword)
         {
+            var userId = HttpContext.Session.GetString("UserId");
+
+            if (UserId.ToString() == userId)
+            {
+                TempData["Error"] = "You cannot change your own password here! Use Settings to change your password.";
+                return RedirectToAction("ViewUsers");
+            }
+            
             if (string.IsNullOrEmpty(NewPassword) || NewPassword.Length < 6)
             {
                 ViewBag.Error = "Password must be at least 6 characters long";

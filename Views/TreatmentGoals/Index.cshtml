@@ -1,0 +1,71 @@
+@model IEnumerable<PracticeFlow.Models.TreatmentGoal>
+@{
+    ViewData["Title"] = "Treatment Goals";
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h2>Treatment Goals</h2>
+        <p class="text-muted mb-0">Problem: @ViewBag.ProblemDescription — @ViewBag.PatientName</p>
+    </div>
+    <div>
+        <a asp-action="Create" asp-route-problemId="@ViewBag.ProblemId"
+           class="btn" style="background-color: #f59e0b; border-color: #f59e0b; color: white;">
+            + Add Goal
+        </a>
+        <a asp-controller="HealthProblems" asp-action="Index"
+           asp-route-patientId="@ViewBag.PatientId"
+           class="btn btn-secondary">Back to Problems</a>
+    </div>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">No treatment goals added for this problem yet.</div>
+}
+else
+{
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Goal</th>
+                <th>Set Date</th>
+                <th>Target Date</th>
+                <th>Progress</th>
+                <th>Update Progress</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var goal in Model)
+            {
+                <tr>
+                    <td>@goal.GoalDescription</td>
+                    <td>@goal.SetDate.ToString("MMM dd, yyyy")</td>
+                    <td>@(goal.TargetDate?.ToString("MMM dd, yyyy") ?? "No target")</td>
+                    <td>
+                        <div class="progress" style="height: 20px;">
+                            <div class="progress-bar bg-success" role="progressbar"
+                                 style="width: @goal.ProgressPercent%">
+                                @goal.ProgressPercent%
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <form asp-action="UpdateProgress" method="post" class="d-flex gap-2">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="goalId" value="@goal.GoalID" />
+                            <input type="number" name="progress" min="0" max="100"
+                                   value="@goal.ProgressPercent" class="form-control form-control-sm"
+                                   style="width: 80px;" />
+                            <button type="submit" class="btn btn-sm btn-secondary">Update</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

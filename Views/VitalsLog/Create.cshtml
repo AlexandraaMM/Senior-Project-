@@ -1,0 +1,71 @@
+@model PracticeFlow.Models.VitalsLog
+
+@{
+    ViewData["Title"] = "Log Patient Vitals";
+}
+
+<div class="container mt-4">
+    <h2>Log Patient Vitals - @ViewBag.PatientName</h2>
+    <hr />
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger">
+            <strong>Please fix the following errors:</strong>
+            <ul>
+                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <li>@error.ErrorMessage</li>
+                }
+            </ul>
+        </div>
+    }
+
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+        
+        <input type="hidden" name="PatientID" value="@ViewBag.PatientId" />
+
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label>Weight (kg) *</label>
+                        <input type="number" name="Weight_kg" class="form-control" 
+                               step="0.1" min="1" max="500" placeholder="e.g., 70.5" 
+                               value="@Model?.Weight_kg" required />
+                        <small class="text-muted">Enter weight in kilograms</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label>Height (cm) *</label>
+                        <input type="number" name="Height_cm" class="form-control" 
+                               step="0.1" min="50" max="300" placeholder="e.g., 175" 
+                               value="@Model?.Height_cm" required />
+                        <small class="text-muted">Enter height in centimeters</small>
+                    </div>
+                </div>
+
+                @if (Model?.Weight_kg > 0 && Model?.Height_cm > 0)
+                {
+                    <div class="alert alert-info">
+                        @{
+                            double heightInMeters = (double)Model.Height_cm / 100.0;
+                            double bmi = (double)Model.Weight_kg / (heightInMeters * heightInMeters);
+                            string category = bmi < 18.5 ? "Underweight" :
+                                            bmi < 25 ? "Normal" :
+                                            bmi < 30 ? "Overweight" : "Obese";
+                        }
+                        <strong>Calculated BMI:</strong> @bmi.ToString("F1") - @category
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="form-group">
+            <button type="submit" class="btn" style="background-color: #10b981; border-color: #10b981; color: white;">
+                Log Vitals
+            </button>
+            <a asp-action="Index" asp-route-patientId="@ViewBag.PatientId" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>

@@ -30,6 +30,7 @@ namespace INF_SP.Controllers
             var patientId = int.Parse(userId);
             var records = await _context.MedicalRecords
                 .Include(r => r.Doctor)
+                .Include(r => r.Prescriptions)
                 .Where(r => r.PatientId == patientId)
                 .OrderByDescending(r => r.RecordDate)
                 .ToListAsync();
@@ -83,7 +84,7 @@ namespace INF_SP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(MedicalRecord record, Prescription Prescription)
+        public async Task<IActionResult> Create(MedicalRecord record, Prescription Prescription, string WalkInPatientName)
         {
             // Check if user is logged in
             if (HttpContext.Session.GetString("UserId") == null)
@@ -98,9 +99,42 @@ namespace INF_SP.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
+            // Handle walk-in patient 
+            if (!string.IsNullOrWhiteSpace(WalkInPatientName))
+            {
+                // Check if a patient with this name already exists
+                var existingPatient = await _context.Users
+                    .FirstOrDefaultAsync(u => u.Role == "Patient" && u.FullName.ToLower() == WalkInPatientName.ToLower());
+                
+                if (existingPatient != null)
+                {
+                    // Patient already exists - use their account
+                    record.PatientId = existingPatient.UserID;
+                }
+                else
+                {
+                    // Create a new patient account
+                    var walkInPatient = new User
+                    {
+                        FullName = WalkInPatientName,
+                        Username = "walkin_" + DateTime.Now.Ticks, 
+                        Email = $"walkin_{DateTime.Now.Ticks}@temp.local", 
+                        Role = "Patient",
+                        PasswordHash = BCrypt.Net.BCrypt.HashPassword("ChangeMe123"), 
+                        DateOfBirth = null
+                    };
+
+                    _context.Users.Add(walkInPatient);
+                    await _context.SaveChangesAsync();
+
+                    record.PatientId = walkInPatient.UserID;
+                }
+            }
+
             record.DoctorId = int.Parse(HttpContext.Session.GetString("UserId")!);
             record.RecordDate = DateTime.Now;
 
+            // Remove prescription validation if not provided
             if (string.IsNullOrWhiteSpace(Prescription.MedicationName))
             {
                 ModelState.Remove("Prescription.MedicationName");
@@ -108,9 +142,25 @@ namespace INF_SP.Controllers
                 ModelState.Remove("Prescription.Instructions");
             }
 
+            // Remove PatientId validation error for walk-ins
+            if (!string.IsNullOrWhiteSpace(WalkInPatientName))
+            {
+                ModelState.Remove("PatientId");
+            }
+
             if (!ModelState.IsValid)
             {
-                // Reload all patients
+                ViewBag.SavedReasonForVisit = record.ReasonForVisit;
+                ViewBag.SavedDiagnosis = record.Diagnosis;
+                ViewBag.SavedTreatment = record.Treatment;
+                ViewBag.SavedNotes = record.Notes;
+                ViewBag.SavedWalkInName = WalkInPatientName;
+                ViewBag.SavedMedicationName = Prescription.MedicationName;
+                ViewBag.SavedDosage = Prescription.Dosage;
+                ViewBag.SavedInstructions = Prescription.Instructions;
+                ViewBag.SavedStartDate = Prescription.StartDate.ToString("yyyy-MM-dd");
+                ViewBag.SavedEndDate = Prescription.EndDate?.ToString("yyyy-MM-dd");
+                
                 var patientList = await _context.Users
                     .Where(u => u.Role == "Patient")
                     .OrderBy(u => u.FullName)
@@ -125,12 +175,11 @@ namespace INF_SP.Controllers
                 return View(record);
             }
 
-            // Save medical record first
             _context.MedicalRecords.Add(record);
             await _context.SaveChangesAsync();
 
             if (Request.Form.ContainsKey("AppointmentId") && !string.IsNullOrEmpty(Request.Form["AppointmentId"]))
-{
+            {
                 var appointmentId = int.Parse(Request.Form["AppointmentId"]!);
                 
                 // Link the medical record to the appointment
@@ -146,7 +195,6 @@ namespace INF_SP.Controllers
                 }
             }
 
-            // Save prescription if medication name is provided
             if (!string.IsNullOrWhiteSpace(Prescription.MedicationName))
             {
                 Prescription.RecordId = record.RecordId;
@@ -158,7 +206,29 @@ namespace INF_SP.Controllers
             }
 
             TempData["Success"] = "Medical record created successfully!";
-            return RedirectToAction("DoctorAppointments", "Appointment");
+            return RedirectToAction("ViewRecords", "DoctorMedicalRecord");
+        }
+
+        public async Task<IActionResult> ViewPrescription(int id)
+        {
+            var userId = HttpContext.Session.GetString("UserId");
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var record = await _context.MedicalRecords
+                .Include(m => m.Doctor)
+                .Include(m => m.Patient)
+                .Include(m => m.Prescriptions)
+                .FirstOrDefaultAsync(m => m.RecordId == id && m.PatientId == int.Parse(userId));
+
+            if (record == null)
+            {
+                return NotFound();
+            }
+
+            return View(record);
         }
     }
 }

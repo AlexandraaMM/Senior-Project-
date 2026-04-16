@@ -5,52 +5,78 @@
 }
 
 <div class="container mt-4">
-    <h2>My Prescriptions</h2>
-    <hr />
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-prescription2"></i> My Prescriptions</h2>
+        <a asp-controller="Home" asp-action="PatientDashboard" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
 
     @if (!Model.Any())
     {
         <div class="alert alert-info">
-            <p>You have no prescriptions on record.</p>
+            <i class="bi bi-info-circle"></i> You don't have any prescriptions yet.
         </div>
     }
     else
     {
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Medication</th>
-                    <th>Dosage</th>
-                    <th>Start Date</th>
-                    <th>End Date</th>
-                    <th>Instructions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var prescription in Model)
-                {
-                    <tr>
-                        <td>@prescription.MedicationName</td>
-                        <td>@prescription.Dosage</td>
-                        <td>@prescription.StartDate.ToString("yyyy-MM-dd")</td>
-                        <td>
-                            @if (prescription.EndDate.HasValue)
-                            {
-                                @prescription.EndDate.Value.ToString("yyyy-MM-dd")
-                            }
-                            else
-                            {
-                                <span class="text-muted">Ongoing</span>
-                            }
-                        </td>
-                        <td>@prescription.Instructions</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    }
+        @foreach (var prescription in Model)
+        {
+            <div class="card mb-3 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h5 class="mb-0"><i class="bi bi-capsule"></i> @prescription.MedicationName</h5>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <small>Prescribed: @prescription.MedicalRecord?.RecordDate.ToString("MMM dd, yyyy")</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <p class="mb-1"><strong>Dosage:</strong></p>
+                            <p class="text-muted">@prescription.Dosage</p>
+                        </div>
+                        <div class="col-md-3">
+                            <p class="mb-1"><strong>Start Date:</strong></p>
+                            <p class="text-muted">@prescription.StartDate.ToString("yyyy-MM-dd")</p>
+                        </div>
+                        <div class="col-md-3">
+                            <p class="mb-1"><strong>End Date:</strong></p>
+                            <p class="text-muted">@(prescription.EndDate?.ToString("yyyy-MM-dd") ?? "Ongoing")</p>
+                        </div>
+                        <div class="col-md-3">
+                            <p class="mb-1"><strong>Doctor:</strong></p>
+                            <p class="text-muted">@prescription.MedicalRecord?.Doctor?.FullName</p>
+                        </div>
+                    </div>
+                    
+                    @if (!string.IsNullOrEmpty(prescription.Instructions))
+                    {
+                        <hr />
+                        <div class="row">
+                            <div class="col-12">
+                                <p class="mb-1"><strong>Instructions:</strong></p>
+                                <p class="text-muted">@prescription.Instructions</p>
+                            </div>
+                        </div>
+                    }
 
-    <div class="mt-3">
-        <a asp-controller="Home" asp-action="PatientDashboard" class="btn btn-secondary">Back to Dashboard</a>
-    </div>
+                    @if (prescription.MedicalRecord != null)
+                    {
+                        <hr />
+                        <div class="row">
+                            <div class="col-12">
+                                <p class="mb-1"><strong>Related Visit:</strong></p>
+                                <p class="text-muted">
+                                    @prescription.MedicalRecord.RecordDate.ToString("MMMM dd, yyyy") - 
+                                    @prescription.MedicalRecord.Diagnosis
+                                </p>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    }
 </div>

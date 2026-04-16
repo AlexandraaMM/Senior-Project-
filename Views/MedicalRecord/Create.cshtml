@@ -31,45 +31,63 @@
         }
         
         <div class="form-group mb-3">
-            <label>Select Patient *</label>
             @if (ViewBag.IsFromAppointment == true && ViewBag.PreSelectedPatient != null)
             {
-                <!-- Read-only display when from appointment -->
+                <label>Patient *</label>
                 <input type="text" class="form-control" value="@ViewBag.PreSelectedPatient.FullName" readonly style="background-color: #e9ecef;">
                 <input type="hidden" name="PatientId" value="@ViewBag.PreSelectedPatient.UserID">
             }
             else
             {
-                <!-- Dropdown when creating record directly -->
-                <select name="PatientId" class="form-control" required>
-                    <option value="">-- Select Patient --</option>
-                    @foreach (var patient in (ViewBag.Patients as List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)!)
-                    {
-                        <option value="@patient.Value">@patient.Text</option>
-                    }
-                </select>
+                <div class="form-check mb-3">
+                    <input type="checkbox" class="form-check-input" id="walkInCheckbox" 
+                           onchange="togglePatientInput()" />
+                    <label class="form-check-label" for="walkInCheckbox">
+                        <strong>Patient is not registered</strong>
+                    </label>
+                </div>
+
+                <!-- Dropdown for registered patients -->
+                <div id="registeredPatientSection">
+                    <label>Select Patient *</label>
+                    <select name="PatientId" id="patientDropdown" class="form-control" required>
+                        <option value="">-- Select Patient --</option>
+                        @foreach (var patient in (ViewBag.Patients as List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)!)
+                        {
+                            <option value="@patient.Value">@patient.Text</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Text input for walk-in patients -->
+                <div id="walkInPatientSection" style="display: none;">
+                    <label>Patient Name *</label>
+                    <input type="text" name="WalkInPatientName" id="walkInName" class="form-control" 
+                           placeholder="Enter patient full name" value="@ViewBag.SavedWalkInName" />
+                    <small class="text-muted">A basic account will be created for this patient</small>
+                </div>
             }
         </div>
 
         <div class="form-group mb-3">
             <label>Reason for Visit *</label>
             <input name="ReasonForVisit" class="form-control" placeholder="E.g., Annual checkup" 
-                   value="@ViewBag.PreFilledReason" required />
+                   value="@(ViewBag.SavedReasonForVisit ?? ViewBag.PreFilledReason)" required />
         </div>
 
         <div class="form-group mb-3">
             <label>Diagnosis</label>
-            <textarea name="Diagnosis" class="form-control" rows="3"></textarea>
+            <textarea name="Diagnosis" class="form-control" rows="3">@ViewBag.SavedDiagnosis</textarea>
         </div>
 
         <div class="form-group mb-3">
             <label>Treatment</label>
-            <textarea name="Treatment" class="form-control" rows="3"></textarea>
+            <textarea name="Treatment" class="form-control" rows="3">@ViewBag.SavedTreatment</textarea>
         </div>
 
         <div class="form-group mb-3">
             <label>Additional Notes</label>
-            <textarea name="Notes" class="form-control" rows="3"></textarea>
+            <textarea name="Notes" class="form-control" rows="3">@ViewBag.SavedNotes</textarea>
         </div>
 
         <hr />
@@ -81,33 +99,67 @@
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label>Medication Name</label>
-                        <input type="text" name="Prescription.MedicationName" class="form-control" placeholder="e.g., Ibuprofen" />
+                        <input type="text" name="Prescription.MedicationName" class="form-control" 
+                               placeholder="e.g., Ibuprofen" value="@ViewBag.SavedMedicationName" />
                     </div>
                     <div class="col-md-6 mb-3">
                         <label>Dosage</label>
-                        <input type="text" name="Prescription.Dosage" class="form-control" placeholder="e.g., 200mg" />
+                        <input type="text" name="Prescription.Dosage" class="form-control" 
+                               placeholder="e.g., 200mg" value="@ViewBag.SavedDosage" />
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label>Start Date</label>
-                        <input type="date" name="Prescription.StartDate" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                        <input type="date" name="Prescription.StartDate" class="form-control" 
+                               value="@(ViewBag.SavedStartDate ?? DateTime.Now.ToString("yyyy-MM-dd"))" />
                     </div>
                     <div class="col-md-6 mb-3">
                         <label>End Date (Optional)</label>
-                        <input type="date" name="Prescription.EndDate" class="form-control" />
+                        <input type="date" name="Prescription.EndDate" class="form-control" 
+                               value="@ViewBag.SavedEndDate" />
                     </div>
                 </div>
                 <div class="mb-3">
                     <label>Instructions</label>
-                    <textarea name="Prescription.Instructions" class="form-control" rows="2" placeholder="e.g., Take twice daily with food"></textarea>
+                    <textarea name="Prescription.Instructions" class="form-control" rows="2" 
+                              placeholder="e.g., Take twice daily with food">@ViewBag.SavedInstructions</textarea>
                 </div>
             </div>
         </div>
 
         <div class="form-group">
-            <button type="submit" class="btn btn-primary">Save Medical Record</button>
+            <button type="submit" class="btn" style="background-color: #f59e0b; border-color: #f59e0b; color: white;">
+                Save Medical Record
+            </button>
             <a asp-controller="Appointment" asp-action="DoctorAppointments" class="btn btn-secondary">Cancel</a>
         </div>
     </form>
 </div>
+
+@section Scripts {
+    <script>
+        function togglePatientInput() {
+            var checkbox = document.getElementById('walkInCheckbox');
+            var registeredSection = document.getElementById('registeredPatientSection');
+            var walkInSection = document.getElementById('walkInPatientSection');
+            var dropdown = document.getElementById('patientDropdown');
+            var walkInInput = document.getElementById('walkInName');
+
+            if (checkbox.checked) {
+                // Walk-in patient
+                registeredSection.style.display = 'none';
+                walkInSection.style.display = 'block';
+                dropdown.removeAttribute('required');
+                dropdown.value = '';
+                walkInInput.setAttribute('required', 'required');
+            } else {
+                registeredSection.style.display = 'block';
+                walkInSection.style.display = 'none';
+                dropdown.setAttribute('required', 'required');
+                walkInInput.removeAttribute('required');
+                walkInInput.value = '';
+            }
+        }
+    </script>
+}

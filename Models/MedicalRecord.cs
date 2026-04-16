@@ -19,6 +19,8 @@ namespace PracticeFlow.Models
     
         [Required]
         public DateTime RecordDate { get; set; } = DateTime.Now;  
+        public ICollection<Prescription>? Prescriptions { get; set; }
+
         
         [StringLength(200)]
         public string ReasonForVisit { get; set; } = string.Empty;  
@@ -27,7 +29,6 @@ namespace PracticeFlow.Models
         
         public string? Treatment { get; set; } = string.Empty;  // Treatment plan
         
-        public string? Prescription { get; set; } = string.Empty;  // Medications prescribed
         
         public string? Notes { get; set; } = string.Empty;  
         

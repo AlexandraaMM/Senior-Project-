@@ -34,6 +34,24 @@ namespace INF_SP.Controllers
                     .OrderByDescending(a => a.AppointmentDate)
                     .ToListAsync();
                 
+                foreach (var appointment in appointments)
+                {
+                    if (appointment.Status == "Scheduled" && 
+                        appointment.AppointmentDate.AddHours(24) < DateTime.Now)
+                    {
+                        // Check if medical record exists
+                        var hasRecord = await _context.MedicalRecords
+                            .AnyAsync(r => r.AppointmentId == appointment.AppointmentId);
+                        
+                        if (!hasRecord)
+                        {
+                            appointment.Status = "Past Due";
+                        }
+                    }
+                }
+                
+                await _context.SaveChangesAsync();
+
                 return View(appointments);
             }
             catch (Exception ex)
@@ -64,12 +82,27 @@ namespace INF_SP.Controllers
                     .OrderByDescending(a => a.AppointmentDate)
                     .ToListAsync();
 
-                // Get medical records created on the same day as the appointment
+                foreach (var appointment in appointments)
+                {
+                    if (appointment.Status == "Scheduled" && 
+                        appointment.AppointmentDate.AddHours(24) < DateTime.Now)
+                    {
+                        var hasRecord = await _context.MedicalRecords
+                            .AnyAsync(r => r.AppointmentId == appointment.AppointmentId);
+                        
+                        if (!hasRecord)
+                        {
+                            appointment.Status = "Past Due";
+                        }
+                    }
+                }
+                
+                await _context.SaveChangesAsync();
+
                 var medicalRecords = await _context.MedicalRecords
                     .Where(r => r.DoctorId == doctorId)
                     .ToListAsync();
 
-                
                 var appointmentRecordMap = new Dictionary<int, int>();
                 foreach (var appointment in appointments.Where(a => a.Status == "Completed"))
                 {
@@ -127,7 +160,6 @@ namespace INF_SP.Controllers
             }
         }
 
-        // Book new appointment
         [HttpPost]
         public async Task<IActionResult> Book(int DoctorId, string AppointmentDate, string AppointmentTime, string Reason)
         {
@@ -146,7 +178,6 @@ namespace INF_SP.Controllers
                 var doctors = await _context.Users.Where(u => u.Role == "Doctor").ToListAsync();
                 ViewBag.Doctors = doctors;
 
-                // Preserve form values for when validation fails
                 ViewBag.SelectedDoctorId = DoctorId;
                 ViewBag.SelectedDate = AppointmentDate;
                 ViewBag.SelectedTime = AppointmentTime;

@@ -11,18 +11,19 @@
 
 @if (!Model.Any())
 {
-    <p>No medical records found.</p>
+    <div class="alert alert-info">No medical records found.</div>
 }
 else
 {
-    <table class="table">
-        <thead>
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
             <tr>
                 <th>Date</th>
                 <th>Doctor</th>
                 <th>Diagnosis</th>
                 <th>Treatment</th>
                 <th>Prescription</th>
+                <th>Vitals</th>
             </tr>
         </thead>
         <tbody>
@@ -33,7 +34,25 @@ else
                     <td>@(record.Doctor?.FullName ?? "N/A")</td>
                     <td>@record.Diagnosis</td>
                     <td>@record.Treatment</td>
-                    <td>@record.Prescription</td>
+                    <td>
+                        @if (record.Prescriptions != null && record.Prescriptions.Any())
+                        {
+                            <a asp-controller="MedicalRecord" asp-action="ViewPrescription" asp-route-id="@record.RecordId" 
+                               class="btn btn-sm" style="background-color: #10b981; border-color: #10b981; color: white;">
+                                View Prescription
+                            </a>
+                        }
+                        else
+                        {
+                            <span class="text-muted">No prescription</span>
+                        }
+                    </td>
+                    <td>
+                        <a asp-controller="VitalsLog" asp-action="MyVitals" 
+                           class="btn btn-sm" style="background-color: #0d9488; border-color: #0d9488; color: white;">
+                            Vitals
+                        </a>
+                    </td>
                 </tr>
             }
         </tbody>
